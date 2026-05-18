@@ -1,0 +1,198 @@
+{
+  "recipients": [
+    "+919566649907",
+    "+919751344188",
+    "+918883821731"
+  ],
+  "report_pages": {
+    "AHF_Material_Matching": {
+      "enabled": false,
+      "filters": [
+        "week"
+      ],
+      "page": "4ec7ccf471c945258609",
+      "report": "1df5c6ee-db88-416c-b064-042aed5333a2",
+      "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
+    },
+    "AMC_Material_Matching": {
+      "enabled": false,
+      "filters": [
+        "week"
+      ],
+      "page": "c3057999c892e79c8330",
+      "report": "3143ebc9-8f22-4bbb-878f-7ae3994b2922",
+      "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
+    },
+    "APE_Material_Matching": {
+      "enabled": false,
+      "filters": [
+        "week"
+      ],
+      "page": "29bb17a45e6647c6bd1b",
+      "report": "9507fedd-a744-494f-9a25-509b3bd6931d",
+      "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
+    },
+    "APE_Report_Job_Work": {
+      "enabled": false,
+      "filters": [],
+      "page": "38e39e62b1d3c56d60a5",
+      "report": "977bf32f-46dd-484a-8390-45b417b1e8e1",
+      "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
+    },
+    "APE_Report_WM": {
+      "enabled": false,
+      "filters": [],
+      "page": "fd2644f3e7b3471e0cdb",
+      "report": "977bf32f-46dd-484a-8390-45b417b1e8e1",
+      "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
+    },
+    "Baywise_AHF_Production": {
+      "enabled": false,
+      "filters": [
+        "date_to_today"
+      ],
+      "page": "134d690a1e6c80a6b6a8",
+      "report": "5c830d1b-34a3-4636-9bfd-787a44bee5e0",
+      "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
+    },
+    "Baywise_AHF_Sales": {
+      "enabled": true,
+      "filters": [
+        "date_to_today"
+      ],
+      "page": "cb947835c8a546d210ba",
+      "report": "5c830d1b-34a3-4636-9bfd-787a44bee5e0",
+      "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
+    },
+    "Baywise_AMC_Production": {
+      "enabled": false,
+      "filters": [
+        "date_to_today"
+      ],
+      "page": "ff9aa2fed9d0d6dbd750",
+      "report": "5c830d1b-34a3-4636-9bfd-787a44bee5e0",
+      "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
+    },
+    "Baywise_AMC_Sales": {
+      "enabled": true,
+      "filters": [
+        "date_to_today"
+      ],
+      "page": "87cc35ab3cb031025187",
+      "report": "5c830d1b-34a3-4636-9bfd-787a44bee5e0",
+      "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
+    },
+    "Baywise_APE_Production": {
+      "enabled": false,
+      "filters": [
+        "date_to_today"
+      ],
+      "page": "f1397c300b32585c4bd7",
+      "report": "5c830d1b-34a3-4636-9bfd-787a44bee5e0",
+      "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
+    },
+    "Baywise_APE_Sales": {
+      "enabled": true,
+      "filters": [
+        "date_to_today"
+      ],
+      "page": "2bc45310e75761ec8039",
+      "report": "5c830d1b-34a3-4636-9bfd-787a44bee5e0",
+      "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
+    },
+    "Ontime_Delivery_AHF": {
+      "enabled": false,
+      "filters": [
+        {
+          "label": "Company",
+          "type": "slicer",
+          "value": "AHF"
+        }
+      ],
+      "page": "aaac226669b881008217",
+      "report": "4f9b988f-64bc-43ba-8fb0-dbcff4295916",
+      "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
+    },
+    "Ontime_Delivery_AMC": {
+      "enabled": false,
+      "filters": [
+        {
+          "label": "Company",
+          "type": "slicer",
+          "value": "AMC"
+        }
+      ],
+      "page": "aaac226669b881008217",
+      "report": "4f9b988f-64bc-43ba-8fb0-dbcff4295916",
+      "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
+    },
+    "Ontime_Delivery_APE": {
+      "enabled": false,
+      "filters": [
+        {
+          "label": "Company",
+          "type": "slicer",
+          "value": "APE"
+        }
+      ],
+      "page": "aaac226669b881008217",
+      "report": "4f9b988f-64bc-43ba-8fb0-dbcff4295916",
+      "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
+    },
+    "Ontime_Production_FG_Bay": {
+      "enabled": false,
+      "filters": [],
+      "page": "9cb90df6a9b5b7f0621c",
+      "report": "f3d71565-b511-45b7-9bde-740d80e1f973",
+      "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
+    },
+    "Ontime_Purchase_AMC_Material_Wise": {
+      "enabled": false,
+      "filters": [],
+      "page": "0fe25f55b95530d5b95d",
+      "report": "febfb6ca-08b4-40b0-a61c-d675f495d153",
+      "workspace": "me"
+    },
+    "Ontime_Purchase_AMC_PO_Creation": {
+      "enabled": false,
+      "filters": [],
+      "page": "ReportSectione875581f54d50092167c",
+      "report": "febfb6ca-08b4-40b0-a61c-d675f495d153",
+      "workspace": "me"
+    },
+    "Ontime_Purchase_APE_Material_Wise": {
+      "enabled": false,
+      "filters": [],
+      "page": "97dba53009d73aa130c8",
+      "report": "7a0b33b1-ad96-41b4-a226-170473a25dfe",
+      "workspace": "me"
+    },
+    "Ontime_Purchase_APE_PO_Creation": {
+      "enabled": false,
+      "filters": [],
+      "page": "ReportSectione875581f54d50092167c",
+      "report": "7a0b33b1-ad96-41b4-a226-170473a25dfe",
+      "workspace": "me"
+    },
+    "Production_Plan_vs_Actual_Baywise": {
+      "enabled": false,
+      "filters": [],
+      "page": "582bb7f7652b5dc13935",
+      "report": "7399a98f-8baf-4ea6-b0e2-22df3cc93bd6",
+      "workspace": "me"
+    },
+    "Production_Plan_vs_Actual_Material_Type": {
+      "enabled": false,
+      "filters": [],
+      "page": "f5308c51324fba683bf5",
+      "report": "7399a98f-8baf-4ea6-b0e2-22df3cc93bd6",
+      "workspace": "me"
+    }
+  },
+  "schedule": {
+    "type": "daily",
+    "time": "08:00",
+    "days": [],
+    "one_time_date": null
+  }
+}

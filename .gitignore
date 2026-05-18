@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.env
+
+# Chrome profiles (contain login sessions - sensitive!)
+pbi_chrome_profile/
+wa_chrome_profile/
+
+# Output files
+screenshots/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+Thumbs.db
+.DS_Store
