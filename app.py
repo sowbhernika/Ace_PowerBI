@@ -18,10 +18,40 @@ from powerbi_whatsapp import take_screenshot, take_screenshots_batch, send_whats
 app = Flask(__name__)
 
 CONFIG_FILE = Path("d:/Ace_powerbi/config.json")
+LOGS_FILE = Path("d:/Ace_powerbi/logs.json")
 SCREENSHOTS_DIR = Path("d:/Ace_powerbi/screenshots")
 TASK_NAME = "PowerBI_WhatsApp_Report"
 PYTHON_EXE = str(Path("d:/Ace_powerbi/venv/Scripts/python.exe"))
 SCRIPT_PATH = str(Path("d:/Ace_powerbi/powerbi_whatsapp.py"))
+
+
+def recipient_phones(recipients):
+    """Extract phone strings from recipients (supports str or dict format)."""
+    phones = []
+    for r in recipients:
+        if isinstance(r, dict):
+            phones.append(r.get("phone", ""))
+        else:
+            phones.append(r)
+    return [p for p in phones if p]
+
+
+def load_logs():
+    if LOGS_FILE.exists():
+        try:
+            with open(LOGS_FILE, "r") as f:
+                return json.load(f)
+        except Exception:
+            return []
+    return []
+
+
+def add_log(entry):
+    logs = load_logs()
+    logs.insert(0, entry)  # newest first
+    logs = logs[:200]  # keep last 200 entries
+    with open(LOGS_FILE, "w") as f:
+        json.dump(logs, f, indent=2)
 
 # Lock to prevent concurrent Selenium sessions
 screenshot_lock = threading.Lock()
@@ -137,56 +167,186 @@ def screenshot_all():
     return jsonify({"status": "ok", "results": results})
 
 
-@app.route("/api/send-now", methods=["POST"])
-def send_now():
-    """Send enabled reports to all recipients right now."""
+# Background send job state
+send_job = {"running": False, "stage": "", "message": "", "done": False,
+            "ok": False, "summary": "", "cancel": False}
+
+
+def _run_send():
+    """Background worker: screenshots + routed WhatsApp send."""
+    import time as _time
+    global send_job
     config = load_config()
     enabled_pages = {k: v for k, v in config["report_pages"].items() if v.get("enabled")}
     recipients = config.get("recipients", [])
-
-    if not enabled_pages:
-        return jsonify({"error": "No reports selected"}), 400
-    if not recipients:
-        return jsonify({"error": "No recipients configured"}), 400
-
-    results = {}
-    import time as _time
+    phones = recipient_phones(recipients)
+    started = datetime.now()
 
     try:
-        # Step 1: Take all screenshots in ONE browser
+        send_job.update({"stage": "screenshots", "message": f"Capturing {len(enabled_pages)} report(s)…"})
         with screenshot_lock:
             kill_chrome()
             screenshots = take_screenshots_batch(enabled_pages)
 
-        # Check how many succeeded
+        if send_job["cancel"]:
+            send_job.update({"running": False, "done": True, "ok": False, "summary": "Cancelled"})
+            return
+
         success_count = sum(1 for v in screenshots.values() if v)
         if success_count == 0:
-            return jsonify({"error": "All screenshots failed. Re-login to Power BI."}), 500
+            add_log({"time": started.strftime("%Y-%m-%d %H:%M:%S"),
+                     "reports": list(enabled_pages.keys()), "recipients": len(phones),
+                     "sent": 0, "failed": len(phones), "status": "FAILED — all screenshots failed"})
+            send_job.update({"running": False, "done": True, "ok": False,
+                             "summary": "All screenshots failed. Re-login to Power BI."})
+            return
 
-        # Brief pause to ensure Chrome fully exits
         _time.sleep(2)
 
-        # Step 2: Send all screenshots in ONE batch (one browser session)
-        from powerbi_whatsapp import send_whatsapp_batch
+        send_job.update({"stage": "sending", "message": "Sending via WhatsApp…"})
+        from powerbi_whatsapp import send_whatsapp_routed
+        report_companies = {k: v.get("company", "GENERAL") for k, v in enabled_pages.items()}
         with send_lock:
-            send_results = send_whatsapp_batch(screenshots, recipients, return_results=True) or []
+            # detailed: [(report, phone, filepath, caption, ok), ...]
+            send_results = send_whatsapp_routed(
+                screenshots, report_companies, recipients, return_results=True) or []
 
-        # Count actual successful sends
-        sent_count = sum(1 for _, ok in send_results if ok)
+        # Build phone -> name lookup
+        name_of = {}
+        for r in recipients:
+            if isinstance(r, dict):
+                name_of[r.get("phone", "")] = r.get("name", "")
+
+        sent_count = sum(1 for x in send_results if x[4])
         total_jobs = len(send_results)
+        failures = [
+            {"report": rep, "phone": ph, "name": name_of.get(ph, ""),
+             "file": fp, "caption": cap}
+            for (rep, ph, fp, cap, ok) in send_results if not ok
+        ]
+        status = "SUCCESS" if sent_count == total_jobs and total_jobs > 0 else (
+            "PARTIAL" if sent_count > 0 else "FAILED")
+        add_log({"time": started.strftime("%Y-%m-%d %H:%M:%S"),
+                 "reports": [k for k, v in screenshots.items() if v], "recipients": len(phones),
+                 "sent": sent_count, "failed": total_jobs - sent_count, "status": status,
+                 "failures": failures})
 
-        for name, filepath in screenshots.items():
-            results[name] = "sent" if filepath else "screenshot failed"
-
-        if total_jobs == 0:
-            return jsonify({"error": "No messages sent. Check WhatsApp login."}), 500
-        if sent_count == 0:
-            return jsonify({"error": "All WhatsApp sends failed. Re-login to WhatsApp."}), 500
-
-        return jsonify({"status": "ok", "results": results,
-                        "summary": f"{sent_count}/{total_jobs} WhatsApp messages sent"})
+        send_job.update({"running": False, "done": True, "ok": sent_count > 0,
+                         "summary": f"{sent_count}/{total_jobs} WhatsApp messages sent"})
     except Exception as e:
-        return jsonify({"error": f"Send failed: {str(e)[:200]}"}), 500
+        add_log({"time": started.strftime("%Y-%m-%d %H:%M:%S"),
+                 "reports": list(enabled_pages.keys()), "recipients": len(phones),
+                 "sent": 0, "failed": len(phones), "status": f"ERROR — {str(e)[:80]}"})
+        send_job.update({"running": False, "done": True, "ok": False,
+                         "summary": f"Send failed: {str(e)[:150]}"})
+
+
+@app.route("/api/send-now", methods=["POST"])
+def send_now():
+    """Start sending in the background. Returns immediately."""
+    global send_job
+    if send_job["running"]:
+        return jsonify({"error": "A send is already running."}), 409
+
+    config = load_config()
+    enabled_pages = {k: v for k, v in config["report_pages"].items() if v.get("enabled")}
+    phones = recipient_phones(config.get("recipients", []))
+    if not enabled_pages:
+        return jsonify({"error": "No reports selected"}), 400
+    if not phones:
+        return jsonify({"error": "No recipients configured"}), 400
+
+    send_job = {"running": True, "stage": "starting", "message": "Starting…",
+                "done": False, "ok": False, "summary": "", "cancel": False}
+    threading.Thread(target=_run_send, daemon=True).start()
+    return jsonify({"status": "started"})
+
+
+@app.route("/api/send-status", methods=["GET"])
+def send_status():
+    return jsonify(send_job)
+
+
+@app.route("/api/send-cancel", methods=["POST"])
+def send_cancel():
+    global send_job
+    send_job["cancel"] = True
+    kill_chrome()
+    return jsonify({"status": "cancelling"})
+
+
+@app.route("/api/logs", methods=["GET"])
+def get_logs():
+    return jsonify(load_logs())
+
+
+@app.route("/api/logs", methods=["DELETE"])
+def clear_logs():
+    with open(LOGS_FILE, "w") as f:
+        json.dump([], f)
+    return jsonify({"status": "ok"})
+
+
+def _run_retry(log_index):
+    """Background worker to retry failed messages from a log entry."""
+    global send_job
+    logs = load_logs()
+    if log_index < 0 or log_index >= len(logs):
+        send_job.update({"running": False, "done": True, "ok": False, "summary": "Log entry not found"})
+        return
+    entry = logs[log_index]
+    failures = entry.get("failures", [])
+    if not failures:
+        send_job.update({"running": False, "done": True, "ok": False, "summary": "No failures to retry"})
+        return
+
+    try:
+        send_job.update({"stage": "sending", "message": f"Retrying {len(failures)} message(s)…"})
+        jobs = [(f["file"], f["phone"], f.get("caption", "")) for f in failures
+                if f.get("file") and os.path.exists(f["file"])]
+        if not jobs:
+            send_job.update({"running": False, "done": True, "ok": False,
+                             "summary": "Screenshot files missing — run a fresh Send."})
+            return
+
+        from powerbi_whatsapp import send_jobs
+        with send_lock:
+            results = send_jobs(jobs)  # [(phone, ok)]
+
+        # Map results back; rebuild remaining failures
+        ok_phones = set()
+        for (phone, ok), j in zip(results, jobs):
+            if ok:
+                ok_phones.add(j[1])
+        new_failures = [f for f in failures if f["phone"] not in ok_phones]
+        retried_ok = len(failures) - len(new_failures)
+
+        # Update the original log entry's failures + counts
+        entry["failures"] = new_failures
+        entry["sent"] = entry.get("sent", 0) + retried_ok
+        entry["failed"] = len(new_failures)
+        if len(new_failures) == 0:
+            entry["status"] = "SUCCESS"
+        with open(LOGS_FILE, "w") as f:
+            json.dump(logs, f, indent=2)
+
+        send_job.update({"running": False, "done": True, "ok": retried_ok > 0,
+                         "summary": f"Retry: {retried_ok}/{len(failures)} now sent"})
+    except Exception as e:
+        send_job.update({"running": False, "done": True, "ok": False,
+                         "summary": f"Retry failed: {str(e)[:150]}"})
+
+
+@app.route("/api/retry/<int:log_index>", methods=["POST"])
+def retry_failed(log_index):
+    """Retry the failed messages of a given log entry."""
+    global send_job
+    if send_job["running"]:
+        return jsonify({"error": "A send is already running."}), 409
+    send_job = {"running": True, "stage": "starting", "message": "Starting retry…",
+                "done": False, "ok": False, "summary": "", "cancel": False}
+    threading.Thread(target=_run_retry, args=(log_index,), daemon=True).start()
+    return jsonify({"status": "started"})
 
 
 @app.route("/api/schedule", methods=["POST"])

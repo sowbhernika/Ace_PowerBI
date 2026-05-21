@@ -504,6 +504,68 @@ def send_whatsapp_batch(screenshots, recipients, return_results=False):
         return results
 
 
+def manager_gets_report(manager_companies, report_company):
+    """Return True if a manager should receive a report based on company match."""
+    if not manager_companies:
+        return False
+    if "ALL" in manager_companies:
+        return True
+    if report_company == "GENERAL":
+        return True  # general reports go to everyone
+    return report_company in manager_companies
+
+
+def send_whatsapp_routed(screenshots, report_companies, recipients, return_results=False):
+    """Send each report only to managers whose companies match the report's company.
+
+    screenshots: {report_name: filepath_or_None}
+    report_companies: {report_name: "AMC"/"AHF"/"APE"/"GENERAL"}
+    recipients: [{name, phone, companies:[...]}]
+    """
+    from send_whatsapp_selenium import send_batch
+
+    jobs = []       # (filepath, phone, caption) for send_batch
+    job_meta = []   # (report_name, phone, filepath, caption) parallel to jobs
+    for page_name, filepath in screenshots.items():
+        if not filepath:
+            continue
+        rcompany = report_companies.get(page_name, "GENERAL")
+        caption = f"{page_name.replace('_', ' ')} - {datetime.now().strftime('%d %b %Y')}"
+        for r in recipients:
+            phone = r.get("phone") if isinstance(r, dict) else r
+            companies = r.get("companies", ["ALL"]) if isinstance(r, dict) else ["ALL"]
+            if phone and manager_gets_report(companies, rcompany):
+                jobs.append((filepath, phone, caption))
+                job_meta.append((page_name, phone, filepath, caption))
+
+    if not jobs:
+        print("No matching report/recipient pairs to send.", flush=True)
+        return [] if return_results else None
+
+    print(f"\n=== Routed send: {len(jobs)} messages (company-matched) ===", flush=True)
+    results = send_batch(jobs)  # [(phone, ok), ...] in same order as jobs
+    sys.stdout.flush()
+
+    # Build detailed results: [(report, phone, filepath, caption, ok)]
+    detailed = []
+    for (page_name, phone, filepath, caption), (_, ok) in zip(job_meta, results):
+        detailed.append((page_name, phone, filepath, caption, ok))
+
+    if return_results:
+        return detailed
+
+
+def send_jobs(jobs):
+    """Re-send a specific list of (filepath, phone, caption) jobs. Used by retry."""
+    from send_whatsapp_selenium import send_batch
+    if not jobs:
+        return []
+    print(f"\n=== Retry send: {len(jobs)} messages ===", flush=True)
+    results = send_batch(jobs)
+    sys.stdout.flush()
+    return results
+
+
 # ─── Run Modes ────────────────────────────────────────────────
 
 def run_from_config():
@@ -539,9 +601,10 @@ def run_from_config():
         print("ERROR: No screenshots taken. Nothing to send.")
         return
 
-    # Step 2: Send all in one batch (one browser session)
+    # Step 2: Route each report to matching-company managers
     time.sleep(2)
-    send_whatsapp_batch(screenshots, recipients)
+    report_companies = {k: v.get("company", "GENERAL") for k, v in enabled_pages.items()}
+    send_whatsapp_routed(screenshots, report_companies, recipients)
 
     print("\nAll done!")
 

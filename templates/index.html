@@ -1,705 +1,578 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Power BI WhatsApp Manager</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f2f5;
-            color: #1a1a2e;
-        }
-        .header {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: white;
-            padding: 20px 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .header h1 { font-size: 22px; font-weight: 600; }
-        .header .subtitle { font-size: 13px; opacity: 0.7; margin-top: 3px; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Power BI Report Manager</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --bg:#0f172a; --bg2:#1e293b; --card:#ffffff; --line:#e2e8f0;
+    --ink:#0f172a; --muted:#64748b; --brand:#2563eb; --brand2:#1d4ed8;
+    --green:#16a34a; --green-bg:#dcfce7; --red:#dc2626; --red-bg:#fee2e2;
+    --amber:#d97706; --amber-bg:#fef3c7;
+  }
+  body { font-family:'Segoe UI',system-ui,sans-serif; background:#f1f5f9; color:var(--ink); }
 
-        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+  /* Topbar */
+  .topbar {
+    background:linear-gradient(135deg,#0f172a,#1e3a8a); color:#fff;
+    padding:0 28px; height:62px; display:flex; align-items:center;
+    justify-content:space-between; position:sticky; top:0; z-index:50;
+    box-shadow:0 2px 12px rgba(0,0,0,.15);
+  }
+  .topbar .brand { display:flex; align-items:center; gap:12px; }
+  .topbar .logo {
+    width:36px; height:36px; border-radius:9px;
+    background:linear-gradient(135deg,#3b82f6,#60a5fa);
+    display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700;
+  }
+  .topbar h1 { font-size:18px; font-weight:600; letter-spacing:.2px; }
+  .topbar .sub { font-size:11px; opacity:.7; }
+  .topbar .actions { display:flex; gap:10px; align-items:center; }
+  .status-pill {
+    font-size:12px; padding:5px 12px; border-radius:20px;
+    background:rgba(255,255,255,.12); display:flex; align-items:center; gap:6px;
+  }
+  .dot { width:8px; height:8px; border-radius:50%; background:#22c55e; }
+  .dot.off { background:#ef4444; }
 
-        .section {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        .section-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .section-title .icon { font-size: 20px; }
+  /* Tabs */
+  .tabs {
+    display:flex; gap:4px; padding:0 28px; background:#fff;
+    border-bottom:1px solid var(--line); position:sticky; top:62px; z-index:40;
+  }
+  .tab {
+    padding:14px 20px; font-size:14px; font-weight:500; color:var(--muted);
+    cursor:pointer; border-bottom:2px solid transparent; transition:all .15s;
+    display:flex; align-items:center; gap:8px;
+  }
+  .tab:hover { color:var(--ink); }
+  .tab.active { color:var(--brand); border-bottom-color:var(--brand); }
+  .tab .badge {
+    background:var(--line); color:var(--muted); font-size:11px;
+    padding:1px 7px; border-radius:10px; font-weight:600;
+  }
+  .tab.active .badge { background:var(--brand); color:#fff; }
 
-        /* Report Cards */
-        .report-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 16px;
-        }
-        .report-card {
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
-            transition: all 0.2s;
-            position: relative;
-        }
-        .report-card.enabled { border-color: #25d366; }
-        .report-card .thumb-container {
-            height: 160px;
-            background: #f5f5f5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            cursor: pointer;
-        }
-        .report-card .thumb-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .report-card .no-preview {
-            color: #999;
-            font-size: 13px;
-            text-align: center;
-        }
-        .report-card .card-body {
-            padding: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .report-card .card-body label {
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .report-card .card-body label input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: #25d366;
-        }
-        .report-card .refresh-btn {
-            background: none;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            padding: 4px 10px;
-            font-size: 12px;
-            cursor: pointer;
-            color: #555;
-            transition: all 0.2s;
-        }
-        .report-card .refresh-btn:hover { background: #f0f0f0; }
-        .report-card .refresh-btn:disabled { opacity: 0.5; cursor: wait; }
+  .container { max-width:1280px; margin:24px auto; padding:0 28px; }
+  .panel { display:none; }
+  .panel.active { display:block; animation:fade .2s; }
+  @keyframes fade { from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:none;} }
 
-        .refresh-all-btn {
-            background: #16213e;
-            color: white;
-            border: none;
-            padding: 8px 18px;
-            border-radius: 8px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .refresh-all-btn:hover { background: #1a1a2e; }
-        .refresh-all-btn:disabled { opacity: 0.5; cursor: wait; }
+  .section-head {
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;
+  }
+  .section-head h2 { font-size:18px; font-weight:600; }
+  .section-head p { font-size:13px; color:var(--muted); margin-top:2px; }
 
-        /* Recipients */
-        .recipient-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-        .recipient-tag {
-            background: #e8f5e9;
-            border: 1px solid #c8e6c9;
-            border-radius: 20px;
-            padding: 6px 14px;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .recipient-tag .remove {
-            cursor: pointer;
-            color: #e53935;
-            font-weight: bold;
-            font-size: 15px;
-        }
-        .add-recipient {
-            display: flex;
-            gap: 8px;
-        }
-        .add-recipient input {
-            padding: 8px 14px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            width: 220px;
-        }
-        .add-recipient button {
-            background: #25d366;
-            color: white;
-            border: none;
-            padding: 8px 18px;
-            border-radius: 8px;
-            font-size: 13px;
-            cursor: pointer;
-        }
+  /* Buttons */
+  .btn {
+    padding:9px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600;
+    cursor:pointer; transition:all .15s; display:inline-flex; align-items:center; gap:7px;
+  }
+  .btn:disabled { opacity:.5; cursor:wait; }
+  .btn-primary { background:var(--brand); color:#fff; }
+  .btn-primary:hover { background:var(--brand2); }
+  .btn-green { background:var(--green); color:#fff; }
+  .btn-green:hover { background:#15803d; }
+  .btn-ghost { background:#fff; border:1px solid var(--line); color:var(--ink); }
+  .btn-ghost:hover { background:#f8fafc; }
+  .btn-danger { background:var(--red); color:#fff; }
+  .btn-danger:hover { background:#b91c1c; }
+  .btn-sm { padding:6px 12px; font-size:12px; }
 
-        /* Schedule */
-        .schedule-options { display: flex; flex-direction: column; gap: 12px; }
-        .schedule-option {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 14px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .schedule-option:hover { background: #f9f9f9; }
-        .schedule-option.active { border-color: #25d366; background: #f0faf2; }
-        .schedule-option input[type="radio"] { accent-color: #25d366; }
-        .schedule-option label { cursor: pointer; font-size: 14px; flex: 1; }
+  /* Report cards */
+  .report-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+  .rcard {
+    background:#fff; border:1px solid var(--line); border-radius:12px; overflow:hidden;
+    transition:all .15s; position:relative;
+  }
+  .rcard.on { border-color:var(--brand); box-shadow:0 0 0 1px var(--brand); }
+  .rcard .thumb {
+    height:150px; background:#f8fafc; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; overflow:hidden; border-bottom:1px solid var(--line);
+  }
+  .rcard .thumb img { width:100%; height:100%; object-fit:cover; }
+  .rcard .thumb .ph { color:#94a3b8; font-size:12px; text-align:center; }
+  .rcard .body { padding:12px 14px; }
+  .rcard .title { font-size:13px; font-weight:600; margin-bottom:3px; }
+  .rcard .meta { font-size:11px; color:var(--muted); margin-bottom:10px; }
+  .rcard .foot { display:flex; align-items:center; justify-content:space-between; }
+  .toggle { position:relative; display:inline-block; width:40px; height:22px; }
+  .toggle input { display:none; }
+  .toggle .slider {
+    position:absolute; inset:0; background:#cbd5e1; border-radius:22px; transition:.2s; cursor:pointer;
+  }
+  .toggle .slider:before {
+    content:''; position:absolute; height:16px; width:16px; left:3px; top:3px;
+    background:#fff; border-radius:50%; transition:.2s;
+  }
+  .toggle input:checked + .slider { background:var(--green); }
+  .toggle input:checked + .slider:before { transform:translateX(18px); }
 
-        .schedule-details {
-            margin-top: 14px;
-            padding: 14px;
-            background: #f9f9f9;
-            border-radius: 8px;
-        }
-        .time-picker {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-        .time-picker input {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        .time-picker label { font-size: 14px; font-weight: 500; }
+  .filter-tag {
+    display:inline-block; font-size:10px; padding:2px 7px; border-radius:5px;
+    background:#eff6ff; color:var(--brand); font-weight:600; margin-right:4px;
+  }
 
-        .day-checkboxes {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 8px;
-        }
-        .day-checkboxes label {
-            padding: 6px 14px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .day-checkboxes label:has(input:checked) {
-            background: #25d366;
-            color: white;
-            border-color: #25d366;
-        }
-        .day-checkboxes input { display: none; }
+  /* Tables */
+  .card { background:#fff; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  table { width:100%; border-collapse:collapse; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.5px;
+    color:var(--muted); padding:12px 16px; background:#f8fafc; border-bottom:1px solid var(--line); }
+  td { padding:12px 16px; font-size:13px; border-bottom:1px solid var(--line); }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:#f8fafc; }
+  .pill { font-size:11px; padding:3px 9px; border-radius:12px; font-weight:600; display:inline-block; }
+  .pill.green { background:var(--green-bg); color:var(--green); }
+  .pill.red { background:var(--red-bg); color:var(--red); }
+  .pill.amber { background:var(--amber-bg); color:var(--amber); }
+  .pill.blue { background:#dbeafe; color:var(--brand); }
 
-        .date-picker { margin-top: 8px; }
-        .date-picker input {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-        }
+  /* Forms */
+  .form-row { display:flex; gap:10px; flex-wrap:wrap; align-items:end; }
+  .field { display:flex; flex-direction:column; gap:5px; }
+  .field label { font-size:12px; font-weight:600; color:var(--muted); }
+  .field input, .field select {
+    padding:9px 12px; border:1px solid var(--line); border-radius:8px; font-size:13px; min-width:140px;
+  }
+  .field input:focus, .field select:focus { outline:none; border-color:var(--brand); }
+  .comp-picker { display:flex; gap:6px; }
+  .comp-picker label {
+    padding:8px 14px; border:1px solid var(--line); border-radius:8px; font-size:13px;
+    cursor:pointer; transition:all .15s; user-select:none;
+  }
+  .comp-picker label:has(input:checked) { background:var(--brand); color:#fff; border-color:var(--brand); }
+  .comp-picker input { display:none; }
 
-        .schedule-status {
-            margin-top: 12px;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-        }
-        .schedule-status.active { background: #e8f5e9; color: #2e7d32; }
-        .schedule-status.inactive { background: #fff3e0; color: #e65100; }
+  /* Schedule */
+  .sched-opts { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-bottom:18px; }
+  .sched-opt {
+    border:1px solid var(--line); border-radius:10px; padding:14px; cursor:pointer; transition:all .15s;
+    display:flex; gap:10px; align-items:flex-start;
+  }
+  .sched-opt:hover { background:#f8fafc; }
+  .sched-opt.active { border-color:var(--brand); background:#eff6ff; }
+  .sched-opt input { margin-top:3px; accent-color:var(--brand); }
+  .sched-opt .t { font-size:13px; font-weight:600; }
+  .sched-opt .d { font-size:11px; color:var(--muted); margin-top:2px; }
+  .day-chips { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+  .day-chips label {
+    padding:6px 14px; border:1px solid var(--line); border-radius:18px; font-size:12px;
+    cursor:pointer; transition:all .15s;
+  }
+  .day-chips label:has(input:checked) { background:var(--brand); color:#fff; border-color:var(--brand); }
+  .day-chips input { display:none; }
 
-        /* Action Buttons */
-        .actions {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-            margin-top: 20px;
-        }
-        .btn {
-            padding: 12px 28px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn:disabled { opacity: 0.5; cursor: wait; }
-        .btn-save { background: #16213e; color: white; }
-        .btn-save:hover { background: #1a1a2e; }
-        .btn-schedule { background: #1565c0; color: white; }
-        .btn-schedule:hover { background: #0d47a1; }
-        .btn-send { background: #25d366; color: white; }
-        .btn-send:hover { background: #1da851; }
-        .btn-delete { background: #e53935; color: white; }
-        .btn-delete:hover { background: #c62828; }
+  .empty { text-align:center; padding:48px; color:var(--muted); font-size:14px; }
 
-        /* Toast */
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            padding: 14px 24px;
-            border-radius: 10px;
-            color: white;
-            font-size: 14px;
-            z-index: 1000;
-            animation: slideIn 0.3s ease;
-            max-width: 400px;
-        }
-        .toast.success { background: #25d366; }
-        .toast.error { background: #e53935; }
-        .toast.info { background: #1565c0; }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  /* Toast + overlay */
+  .toast {
+    position:fixed; bottom:24px; right:24px; padding:13px 20px; border-radius:10px; color:#fff;
+    font-size:13px; z-index:1000; box-shadow:0 8px 24px rgba(0,0,0,.18); animation:slin .25s; max-width:380px;
+  }
+  .toast.success{background:var(--green);} .toast.error{background:var(--red);} .toast.info{background:var(--brand);}
+  @keyframes slin { from{transform:translateX(120%);} to{transform:none;} }
+  .overlay { display:none; position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:999; align-items:center; justify-content:center; }
+  .overlay.on { display:flex; }
+  .ov-box { background:#fff; padding:28px 36px; border-radius:14px; text-align:center; min-width:280px; }
+  .spinner { width:38px; height:38px; border:4px solid var(--line); border-top-color:var(--brand); border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 14px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,.88); z-index:1000; align-items:center; justify-content:center; cursor:pointer; }
+  .lightbox.on { display:flex; }
+  .lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
 
-        /* Overlay */
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
-            align-items: center;
-            justify-content: center;
-        }
-        .overlay.active { display: flex; }
-        .overlay-content {
-            background: white;
-            padding: 30px 40px;
-            border-radius: 12px;
-            text-align: center;
-        }
-        .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid #e0e0e0;
-            border-top: 4px solid #25d366;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Lightbox for full-size preview */
-        .lightbox {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.85);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-        .lightbox.active { display: flex; }
-        .lightbox img {
-            max-width: 95%;
-            max-height: 95%;
-            border-radius: 8px;
-        }
-    </style>
+  .toolbar { display:flex; gap:10px; flex-wrap:wrap; }
+  .stat-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+  .stat { background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px 18px; }
+  .stat .n { font-size:26px; font-weight:700; }
+  .stat .l { font-size:12px; color:var(--muted); margin-top:2px; }
+</style>
 </head>
 <body>
-    <div class="header">
-        <div>
-            <h1>Power BI WhatsApp Manager</h1>
-            <div class="subtitle">Select reports, set recipients, schedule delivery</div>
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">📊</div>
+      <div>
+        <h1>Power BI Report Manager</h1>
+        <div class="sub">Automated dashboard delivery via WhatsApp</div>
+      </div>
+    </div>
+    <div class="actions">
+      <div class="status-pill"><span class="dot" id="schedDot"></span><span id="schedLabel">Checking…</span></div>
+      <button class="btn btn-green" onclick="sendNow()">Send Now</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="reports" onclick="switchTab('reports')">📈 Reports <span class="badge" id="repBadge">0</span></div>
+    <div class="tab" data-tab="recipients" onclick="switchTab('recipients')">👥 Managers <span class="badge" id="recBadge">0</span></div>
+    <div class="tab" data-tab="schedule" onclick="switchTab('schedule')">🕐 Schedule</div>
+    <div class="tab" data-tab="logs" onclick="switchTab('logs')">📋 Logs</div>
+  </div>
+
+  <div class="container">
+    <!-- REPORTS -->
+    <div class="panel active" id="panel-reports">
+      <div class="section-head">
+        <div><h2>Report Pages</h2><p>Toggle the reports to include. Click a preview to enlarge.</p></div>
+        <div class="toolbar">
+          <button class="btn btn-ghost btn-sm" onclick="selectAllReports(true)">Enable All</button>
+          <button class="btn btn-ghost btn-sm" onclick="selectAllReports(false)">Disable All</button>
+          <button class="btn btn-primary btn-sm" onclick="refreshAll()">↻ Refresh Previews</button>
         </div>
+      </div>
+      <div class="report-grid" id="reportGrid"></div>
     </div>
 
-    <div class="container">
-        <!-- Report Pages -->
-        <div class="section">
-            <div class="section-title" style="justify-content: space-between;">
-                <span><span class="icon">&#128202;</span> Report Pages</span>
-                <button class="refresh-all-btn" onclick="refreshAll()">Refresh All Previews</button>
+    <!-- RECIPIENTS -->
+    <div class="panel" id="panel-recipients">
+      <div class="section-head">
+        <div><h2>Managers / Recipients</h2><p>People who receive the reports on WhatsApp.</p></div>
+      </div>
+      <div class="card" style="padding:16px; margin-bottom:18px;">
+        <div class="form-row">
+          <div class="field"><label>Name</label><input id="rName" placeholder="Manager name"></div>
+          <div class="field"><label>Phone (with +91)</label><input id="rPhone" placeholder="+919XXXXXXXXX"></div>
+          <div class="field"><label>Companies (select one or more)</label>
+            <div class="comp-picker" id="rCompanies">
+              <label><input type="checkbox" value="ALL">All</label>
+              <label><input type="checkbox" value="AMC">AMC</label>
+              <label><input type="checkbox" value="APE">APE</label>
+              <label><input type="checkbox" value="AHF">AHF</label>
             </div>
-            <div class="report-grid" id="reportGrid"></div>
+          </div>
+          <div class="field"><label>Department</label><input id="rDept" placeholder="e.g. Production"></div>
+          <button class="btn btn-primary" id="addBtn" onclick="addRecipient()">+ Add Manager</button>
+          <button class="btn btn-ghost" id="cancelBtn" onclick="cancelEdit()" style="display:none;">Cancel</button>
         </div>
-
-        <!-- Recipients -->
-        <div class="section">
-            <div class="section-title"><span class="icon">&#128100;</span> Recipients</div>
-            <div class="recipient-list" id="recipientList"></div>
-            <div class="add-recipient">
-                <input type="text" id="newRecipient" placeholder="+91XXXXXXXXXX" onkeydown="if(event.key==='Enter') addRecipient()">
-                <button onclick="addRecipient()">Add</button>
-            </div>
-        </div>
-
-        <!-- Schedule -->
-        <div class="section">
-            <div class="section-title"><span class="icon">&#128339;</span> Schedule</div>
-            <div class="schedule-options">
-                <div class="schedule-option" onclick="selectSchedule('daily')">
-                    <input type="radio" name="schedType" value="daily" id="sched_daily">
-                    <label for="sched_daily"><strong>Daily</strong> — Every day at a fixed time</label>
-                </div>
-                <div class="schedule-option" onclick="selectSchedule('weekdays')">
-                    <input type="radio" name="schedType" value="weekdays" id="sched_weekdays">
-                    <label for="sched_weekdays"><strong>Weekdays</strong> — Monday to Friday</label>
-                </div>
-                <div class="schedule-option" onclick="selectSchedule('specific_days')">
-                    <input type="radio" name="schedType" value="specific_days" id="sched_specific">
-                    <label for="sched_specific"><strong>Specific Days</strong> — Choose which days</label>
-                </div>
-                <div class="schedule-option" onclick="selectSchedule('one_time')">
-                    <input type="radio" name="schedType" value="one_time" id="sched_once">
-                    <label for="sched_once"><strong>One-time</strong> — Send once on a specific date</label>
-                </div>
-            </div>
-
-            <div class="schedule-details">
-                <div class="time-picker">
-                    <label for="schedTime">Time:</label>
-                    <input type="time" id="schedTime" value="08:00">
-                </div>
-
-                <div class="day-checkboxes" id="dayCheckboxes" style="display: none;">
-                    <label><input type="checkbox" value="MON"> Mon</label>
-                    <label><input type="checkbox" value="TUE"> Tue</label>
-                    <label><input type="checkbox" value="WED"> Wed</label>
-                    <label><input type="checkbox" value="THU"> Thu</label>
-                    <label><input type="checkbox" value="FRI"> Fri</label>
-                    <label><input type="checkbox" value="SAT"> Sat</label>
-                    <label><input type="checkbox" value="SUN"> Sun</label>
-                </div>
-
-                <div class="date-picker" id="datePicker" style="display: none;">
-                    <label>Date: <input type="date" id="schedDate"></label>
-                </div>
-            </div>
-
-            <div class="schedule-status" id="scheduleStatus"></div>
-        </div>
-
-        <!-- Actions -->
-        <div class="actions">
-            <button class="btn btn-delete" onclick="deleteSchedule()">Remove Schedule</button>
-            <button class="btn btn-save" onclick="saveConfig()">Save Config</button>
-            <button class="btn btn-schedule" onclick="saveSchedule()">Save Schedule</button>
-            <button class="btn btn-send" onclick="sendNow()">Send Now</button>
-        </div>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Name</th><th>Phone</th><th>Companies</th><th>Department</th><th></th></tr></thead>
+          <tbody id="recBody"></tbody>
+        </table>
+        <div class="empty" id="recEmpty" style="display:none;">No managers added yet.</div>
+      </div>
     </div>
 
-    <!-- Loading overlay -->
-    <div class="overlay" id="overlay">
-        <div class="overlay-content">
-            <div class="spinner"></div>
-            <div id="overlayText">Processing...</div>
+    <!-- SCHEDULE -->
+    <div class="panel" id="panel-schedule">
+      <div class="section-head"><div><h2>Delivery Schedule</h2><p>When to automatically send the enabled reports.</p></div></div>
+      <div class="card" style="padding:20px;">
+        <div class="sched-opts">
+          <label class="sched-opt" onclick="selSched('daily')"><input type="radio" name="st" value="daily"><div><div class="t">Daily</div><div class="d">Every day at a set time</div></div></label>
+          <label class="sched-opt" onclick="selSched('weekdays')"><input type="radio" name="st" value="weekdays"><div><div class="t">Weekdays</div><div class="d">Monday to Friday</div></div></label>
+          <label class="sched-opt" onclick="selSched('specific_days')"><input type="radio" name="st" value="specific_days"><div><div class="t">Specific Days</div><div class="d">Choose which days</div></div></label>
+          <label class="sched-opt" onclick="selSched('one_time')"><input type="radio" name="st" value="one_time"><div><div class="t">One-time</div><div class="d">Send once on a date</div></div></label>
         </div>
+        <div class="form-row" style="margin-bottom:6px;">
+          <div class="field"><label>Time</label><input type="time" id="schedTime" value="08:00"></div>
+          <div class="field" id="dateField" style="display:none;"><label>Date</label><input type="date" id="schedDate"></div>
+        </div>
+        <div class="day-chips" id="dayChips" style="display:none;">
+          <label><input type="checkbox" value="MON">Mon</label><label><input type="checkbox" value="TUE">Tue</label>
+          <label><input type="checkbox" value="WED">Wed</label><label><input type="checkbox" value="THU">Thu</label>
+          <label><input type="checkbox" value="FRI">Fri</label><label><input type="checkbox" value="SAT">Sat</label>
+          <label><input type="checkbox" value="SUN">Sun</label>
+        </div>
+        <div style="margin-top:18px; display:flex; gap:10px;">
+          <button class="btn btn-primary" onclick="saveSchedule()">Save Schedule</button>
+          <button class="btn btn-danger" onclick="deleteSchedule()">Remove Schedule</button>
+        </div>
+        <div id="schedStatus" style="margin-top:14px; font-size:13px;"></div>
+      </div>
     </div>
 
-    <!-- Lightbox for full image preview -->
-    <div class="lightbox" id="lightbox" onclick="this.classList.remove('active')">
-        <img id="lightboxImg" src="">
+    <!-- LOGS -->
+    <div class="panel" id="panel-logs">
+      <div class="section-head">
+        <div><h2>Send History</h2><p>Record of every send attempt.</p></div>
+        <button class="btn btn-ghost btn-sm" onclick="clearLogs()">Clear Logs</button>
+      </div>
+      <div class="stat-row" id="statRow"></div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Time</th><th>Reports</th><th>Recipients</th><th>Sent</th><th>Failed</th><th>Status</th><th></th></tr></thead>
+          <tbody id="logBody"></tbody>
+        </table>
+        <div class="empty" id="logEmpty" style="display:none;">No send history yet.</div>
+      </div>
     </div>
+  </div>
+
+  <div class="overlay" id="overlay"><div class="ov-box"><div class="spinner"></div><div id="ovText">Working…</div>
+    <button class="btn btn-danger btn-sm" id="ovCancel" onclick="cancelSend()" style="display:none; margin-top:16px;">Stop Sending</button>
+  </div></div>
+  <div class="lightbox" id="lightbox" onclick="this.classList.remove('on')"><img id="lbImg" src=""></div>
 
 <script>
 let config = {};
 
-// ─── Init ───
 async function init() {
-    const res = await fetch('/api/config');
-    config = await res.json();
-    renderReports();
-    renderRecipients();
-    renderSchedule();
-    checkScheduleStatus();
+  const r = await fetch('/api/config'); config = await r.json();
+  // normalize recipients to objects
+  config.recipients = (config.recipients||[]).map(x => typeof x === 'string' ? {name:'', phone:x, company:'', dept:''} : x);
+  renderReports(); renderRecipients(); renderSchedule();
+  checkSchedule(); loadLogs();
 }
 
-// ─── Reports ───
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach(e=>e.classList.toggle('active', e.dataset.tab===t));
+  document.querySelectorAll('.panel').forEach(e=>e.classList.remove('active'));
+  document.getElementById('panel-'+t).classList.add('active');
+  if (t==='logs') loadLogs();
+}
+
+// ---- Reports ----
 async function renderReports() {
-    const thumbRes = await fetch('/api/thumbnails');
-    const thumbs = await thumbRes.json();
-    const grid = document.getElementById('reportGrid');
-    grid.innerHTML = '';
+  const tr = await fetch('/api/thumbnails'); const thumbs = await tr.json();
+  const grid = document.getElementById('reportGrid'); grid.innerHTML='';
+  let on=0;
+  for (const [name,page] of Object.entries(config.report_pages)) {
+    if (page.enabled) on++;
+    const t = thumbs[name];
+    const filters = (page.filters||[]).map(f => typeof f==='string'?f:(f.label+'='+f.value)).join(' ');
+    const card = document.createElement('div');
+    card.className = 'rcard '+(page.enabled?'on':'');
+    card.innerHTML = `
+      <div class="thumb" onclick="preview('${name}')">
+        ${t?`<img src="${t}?t=${Date.now()}">`:`<div class="ph">No preview<br>↻ Refresh</div>`}
+      </div>
+      <div class="body">
+        <div class="title">${name.replace(/_/g,' ')}</div>
+        <div class="meta">
+          <span class="pill ${page.company==='GENERAL'?'amber':'blue'}" style="font-size:10px">${page.company||'GENERAL'}</span>
+          ${filters?filters.split(' ').map(f=>`<span class="filter-tag">${f}</span>`).join(''):''}
+        </div>
+        <div class="foot">
+          <label class="toggle"><input type="checkbox" ${page.enabled?'checked':''} onchange="toggleReport('${name}',this.checked)"><span class="slider"></span></label>
+          <button class="btn btn-ghost btn-sm" onclick="refreshOne('${name}',this)">↻ Refresh</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  }
+  document.getElementById('repBadge').textContent = on;
+}
+function toggleReport(name,c){ config.report_pages[name].enabled=c; event.target.closest('.rcard').classList.toggle('on',c); saveConfig(); renderReports(); }
+function selectAllReports(v){ for(const k in config.report_pages) config.report_pages[k].enabled=v; saveConfig(); renderReports(); }
+function preview(name){ document.getElementById('lbImg').src=`/thumbnail/${name}?t=${Date.now()}`; document.getElementById('lightbox').classList.add('on'); }
+async function refreshOne(name,btn){ btn.disabled=true; btn.textContent='…';
+  try { const r=await fetch(`/api/screenshot/${name}`,{method:'POST'}); const d=await r.json();
+    if(r.ok){toast('Preview updated','success'); renderReports();} else toast(d.error||'Failed','error');
+  } catch(e){ toast('Error: '+e.message,'error'); } btn.disabled=false; btn.textContent='↻ Refresh'; }
+async function refreshAll(){ showOv('Capturing all report previews… this may take a few minutes');
+  try { const r=await fetch('/api/screenshot-all',{method:'POST'}); const d=await r.json();
+    if(r.ok){toast('All previews refreshed','success'); renderReports();} else toast(d.error||'Failed','error');
+  } catch(e){ toast('Error: '+e.message,'error'); } hideOv(); }
 
-    for (const [name, page] of Object.entries(config.report_pages)) {
-        const enabled = page.enabled;
-        const thumbUrl = thumbs[name];
-        const card = document.createElement('div');
-        card.className = `report-card ${enabled ? 'enabled' : ''}`;
-        card.innerHTML = `
-            <div class="thumb-container" onclick="showPreview('${name}')">
-                ${thumbUrl
-                    ? `<img src="${thumbUrl}?t=${Date.now()}" alt="${name}">`
-                    : `<div class="no-preview">No preview<br>Click "Refresh" below</div>`}
-            </div>
-            <div class="card-body">
-                <label>
-                    <input type="checkbox" ${enabled ? 'checked' : ''} onchange="toggleReport('${name}', this.checked)">
-                    ${name.replace(/_/g, ' ')}
-                </label>
-                <button class="refresh-btn" onclick="refreshOne('${name}', this)">Refresh</button>
-            </div>
-        `;
-        grid.appendChild(card);
+// ---- Recipients ----
+function renderRecipients(){
+  const b=document.getElementById('recBody'); b.innerHTML='';
+  const list=config.recipients||[];
+  document.getElementById('recEmpty').style.display = list.length?'none':'block';
+  list.forEach((r,i)=>{
+    const comps = (r.companies||[]).map(c=>`<span class="pill ${c==='ALL'?'green':'blue'}">${c}</span>`).join(' ') || '—';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><b>${r.name||'<span style=color:#cbd5e1>—</span>'}</b></td>
+      <td>${r.phone}</td>
+      <td>${comps}</td>
+      <td>${r.dept||'—'}</td>
+      <td style="text-align:right; white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="editRecipient(${i})">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="delRecipient(${i})">Remove</button>
+      </td>`;
+    b.appendChild(tr);
+  });
+  document.getElementById('recBadge').textContent = list.length;
+}
+
+let editIndex = -1;
+
+function getCompanies(){
+  return [...document.querySelectorAll('#rCompanies input:checked')].map(c=>c.value);
+}
+function setCompanies(arr){
+  document.querySelectorAll('#rCompanies input').forEach(c=>c.checked=(arr||[]).includes(c.value));
+}
+
+function editRecipient(i){
+  const r = config.recipients[i];
+  document.getElementById('rName').value = r.name||'';
+  document.getElementById('rPhone').value = r.phone||'';
+  setCompanies(r.companies||[]);
+  document.getElementById('rDept').value = r.dept||'';
+  editIndex = i;
+  const btn = document.getElementById('addBtn');
+  btn.textContent = '✓ Update Manager';
+  btn.classList.remove('btn-primary'); btn.classList.add('btn-green');
+  document.getElementById('cancelBtn').style.display = 'inline-flex';
+  document.getElementById('rName').focus();
+}
+
+function cancelEdit(){
+  editIndex = -1;
+  document.getElementById('rName').value=''; document.getElementById('rPhone').value='';
+  setCompanies([]); document.getElementById('rDept').value='';
+  const btn = document.getElementById('addBtn');
+  btn.textContent='+ Add Manager'; btn.classList.add('btn-primary'); btn.classList.remove('btn-green');
+  document.getElementById('cancelBtn').style.display='none';
+}
+
+function addRecipient(){
+  let phone=document.getElementById('rPhone').value.trim();
+  const name=document.getElementById('rName').value.trim();
+  const companies=getCompanies();
+  const dept=document.getElementById('rDept').value.trim();
+  if(!phone){ toast('Phone is required','error'); return; }
+  if(!phone.startsWith('+')) phone='+'+phone;
+  if(!/^\+\d{10,15}$/.test(phone)){ toast('Invalid phone format','error'); return; }
+  if(!companies.length){ toast('Select at least one company','error'); return; }
+  if(config.recipients.some((r,idx)=>r.phone===phone && idx!==editIndex)){ toast('Phone already exists','info'); return; }
+
+  if(editIndex>=0){
+    config.recipients[editIndex] = {name,phone,companies,dept};
+    toast('Manager updated','success');
+  } else {
+    config.recipients.push({name,phone,companies,dept});
+    toast('Manager added','success');
+  }
+  renderRecipients(); saveConfig(); cancelEdit();
+}
+function delRecipient(i){
+  if(editIndex===i) cancelEdit();
+  config.recipients.splice(i,1); renderRecipients(); saveConfig();
+}
+
+// ---- Schedule ----
+function renderSchedule(){
+  const s=config.schedule||{}; selSched(s.type||'daily');
+  document.getElementById('schedTime').value=s.time||'08:00';
+  if(s.days) document.querySelectorAll('#dayChips input').forEach(c=>c.checked=s.days.includes(c.value));
+  if(s.one_time_date) document.getElementById('schedDate').value=s.one_time_date;
+}
+function selSched(t){
+  document.querySelectorAll('.sched-opt').forEach(e=>e.classList.remove('active'));
+  const radio=document.querySelector(`input[name=st][value=${t}]`);
+  if(radio){ radio.checked=true; radio.closest('.sched-opt').classList.add('active'); }
+  document.getElementById('dayChips').style.display = t==='specific_days'?'flex':'none';
+  document.getElementById('dateField').style.display = t==='one_time'?'flex':'none';
+}
+function getSched(){
+  const t=document.querySelector('input[name=st]:checked')?.value||'daily';
+  const time=document.getElementById('schedTime').value;
+  const days=[...document.querySelectorAll('#dayChips input:checked')].map(c=>c.value);
+  let one_time_date=null;
+  if(t==='one_time'){ const d=document.getElementById('schedDate').value; if(d){const[y,m,dd]=d.split('-'); one_time_date=`${m}/${dd}/${y}`;} }
+  return {type:t,time,days,one_time_date};
+}
+async function checkSchedule(){
+  const r=await fetch('/api/schedule/status'); const d=await r.json();
+  const dot=document.getElementById('schedDot'), lbl=document.getElementById('schedLabel'), st=document.getElementById('schedStatus');
+  if(d.active){ dot.classList.remove('off'); lbl.textContent='Scheduled'; if(st)st.innerHTML=`<span class="pill green">Active</span> Next run: <b>${d.next_run}</b>`; }
+  else { dot.classList.add('off'); lbl.textContent='No schedule'; if(st)st.innerHTML=`<span class="pill amber">Inactive</span> Reports won't auto-send.`; }
+}
+async function saveSchedule(){
+  config.schedule=getSched(); await saveConfig();
+  const r=await fetch('/api/schedule',{method:'POST'}); const d=await r.json();
+  if(r.ok){ toast(d.message||'Schedule saved','success'); checkSchedule(); } else toast(d.error||'Failed — run as Administrator','error');
+}
+async function deleteSchedule(){ const r=await fetch('/api/schedule',{method:'DELETE'});
+  if(r.ok){toast('Schedule removed','success');} else toast('No schedule','info'); checkSchedule(); }
+
+// ---- Logs ----
+async function loadLogs(){
+  const r=await fetch('/api/logs'); const logs=await r.json();
+  const b=document.getElementById('logBody'); b.innerHTML='';
+  document.getElementById('logEmpty').style.display=logs.length?'none':'block';
+  let totSent=0,totFail=0,success=0;
+  logs.forEach((l,idx)=>{
+    totSent+=l.sent||0; totFail+=l.failed||0; if(l.status==='SUCCESS')success++;
+    let cls=l.status==='SUCCESS'?'green':(l.status==='PARTIAL'?'amber':'red');
+    const fails=l.failures||[];
+    const retryBtn = fails.length ? `<button class="btn btn-primary btn-sm" onclick="retryLog(${idx})">↻ Retry ${fails.length}</button>` : '';
+    const expandBtn = fails.length ? `<button class="btn btn-ghost btn-sm" onclick="toggleFails(${idx})">View ${fails.length} failed</button>` : '';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${l.time}</td><td>${(l.reports||[]).length} report(s)</td>
+      <td>${l.recipients}</td><td>${l.sent}</td><td>${l.failed}</td>
+      <td><span class="pill ${cls}">${l.status}</span></td>
+      <td style="text-align:right; white-space:nowrap">${expandBtn} ${retryBtn}</td>`;
+    b.appendChild(tr);
+    if(fails.length){
+      const fr=document.createElement('tr'); fr.id='fails-'+idx; fr.style.display='none';
+      fr.innerHTML=`<td colspan="7" style="background:#fef2f2; padding:0">
+        <table style="width:100%"><thead><tr><th>Report</th><th>Manager</th><th>Phone</th></tr></thead>
+        <tbody>${fails.map(f=>`<tr><td>${(f.report||'').replace(/_/g,' ')}</td><td>${f.name||'—'}</td><td>${f.phone}</td></tr>`).join('')}</tbody></table>
+      </td>`;
+      b.appendChild(fr);
     }
+  });
+  document.getElementById('statRow').innerHTML=`
+    <div class="stat"><div class="n">${logs.length}</div><div class="l">Total Runs</div></div>
+    <div class="stat"><div class="n" style="color:var(--green)">${success}</div><div class="l">Successful</div></div>
+    <div class="stat"><div class="n" style="color:var(--brand)">${totSent}</div><div class="l">Messages Sent</div></div>
+    <div class="stat"><div class="n" style="color:var(--red)">${totFail}</div><div class="l">Failed</div></div>`;
+}
+async function clearLogs(){ await fetch('/api/logs',{method:'DELETE'}); loadLogs(); toast('Logs cleared','info'); }
+function toggleFails(idx){ const e=document.getElementById('fails-'+idx); if(e) e.style.display = e.style.display==='none'?'table-row':'none'; }
+async function retryLog(idx){
+  try{
+    const r=await fetch(`/api/retry/${idx}`,{method:'POST'}); const d=await r.json();
+    if(!r.ok){ toast(d.error||'Could not start retry','error'); return; }
+    showOvCancel('Retrying failed messages…'); pollSend();
+  }catch(e){ toast('Error: '+e.message,'error'); }
 }
 
-function toggleReport(name, checked) {
-    config.report_pages[name].enabled = checked;
-    const card = event.target.closest('.report-card');
-    card.classList.toggle('enabled', checked);
+// ---- Send ----
+let pollTimer=null;
+async function sendNow(){
+  const on=Object.values(config.report_pages).filter(p=>p.enabled).length;
+  if(!on){toast('No reports enabled','error'); return;}
+  if(!config.recipients.length){toast('No managers added','error'); return;}
+  try{
+    await saveConfig();
+    const r=await fetch('/api/send-now',{method:'POST'}); const d=await r.json();
+    if(!r.ok){ toast(d.error||'Could not start send','error'); return; }
+    showOvCancel(`Starting…`);
+    pollSend();
+  }catch(e){ toast('Error: '+e.message,'error'); }
 }
 
-function showPreview(name) {
-    const img = document.getElementById('lightboxImg');
-    img.src = `/thumbnail/${name}?t=${Date.now()}`;
-    document.getElementById('lightbox').classList.add('active');
-}
-
-async function refreshOne(name, btn) {
-    btn.disabled = true;
-    btn.textContent = 'Loading...';
-    try {
-        const res = await fetch(`/api/screenshot/${name}`, { method: 'POST' });
-        const data = await res.json();
-        if (res.ok) {
-            toast('Screenshot updated: ' + name.replace(/_/g, ' '), 'success');
-            renderReports();
-        } else {
-            toast(data.error || 'Failed', 'error');
-        }
-    } catch (e) {
-        toast('Error: ' + e.message, 'error');
+async function pollSend(){
+  try{
+    const r=await fetch('/api/send-status'); const s=await r.json();
+    document.getElementById('ovText').textContent = s.message || 'Working…';
+    if(s.done){
+      hideOv();
+      toast(s.summary || (s.ok?'Done':'Failed'), s.ok?'success':'error');
+      loadLogs();
+      return;
     }
-    btn.disabled = false;
-    btn.textContent = 'Refresh';
+  }catch(e){ /* keep polling */ }
+  pollTimer=setTimeout(pollSend, 3000);
 }
 
-async function refreshAll() {
-    showOverlay('Taking screenshots of all reports...');
-    try {
-        const res = await fetch('/api/screenshot-all', { method: 'POST' });
-        const data = await res.json();
-        if (res.ok) {
-            toast('All previews refreshed!', 'success');
-            renderReports();
-        } else {
-            toast(data.error || 'Failed', 'error');
-        }
-    } catch (e) {
-        toast('Error: ' + e.message, 'error');
-    }
-    hideOverlay();
+async function cancelSend(){
+  await fetch('/api/send-cancel',{method:'POST'});
+  document.getElementById('ovText').textContent='Cancelling…';
 }
 
-// ─── Recipients ───
-function renderRecipients() {
-    const list = document.getElementById('recipientList');
-    list.innerHTML = '';
-    (config.recipients || []).forEach((phone, i) => {
-        const tag = document.createElement('div');
-        tag.className = 'recipient-tag';
-        tag.innerHTML = `${phone} <span class="remove" onclick="removeRecipient(${i})">&#x2715;</span>`;
-        list.appendChild(tag);
-    });
+function showOvCancel(t){
+  document.getElementById('ovText').textContent=t;
+  document.getElementById('ovCancel').style.display='inline-flex';
+  document.getElementById('overlay').classList.add('on');
 }
 
-function addRecipient() {
-    const input = document.getElementById('newRecipient');
-    let phone = input.value.trim();
-    if (!phone) return;
-    if (!phone.startsWith('+')) phone = '+' + phone;
-    if (!/^\+\d{10,15}$/.test(phone)) {
-        toast('Invalid phone number format', 'error');
-        return;
-    }
-    if (config.recipients.includes(phone)) {
-        toast('Already added', 'info');
-        return;
-    }
-    config.recipients.push(phone);
-    renderRecipients();
-    input.value = '';
+// ---- Helpers ----
+async function saveConfig(){
+  config.schedule=getSched();
+  await fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(config)});
 }
+function showOv(t){ document.getElementById('ovText').textContent=t; document.getElementById('overlay').classList.add('on'); }
+function hideOv(){ document.getElementById('overlay').classList.remove('on'); document.getElementById('ovCancel').style.display='none'; if(pollTimer)clearTimeout(pollTimer); }
+function toast(m,t='info'){ const e=document.createElement('div'); e.className='toast '+t; e.textContent=m; document.body.appendChild(e); setTimeout(()=>e.remove(),4000); }
 
-function removeRecipient(index) {
-    config.recipients.splice(index, 1);
-    renderRecipients();
-}
-
-// ─── Schedule ───
-function renderSchedule() {
-    const sched = config.schedule || {};
-    const type = sched.type || 'daily';
-    selectSchedule(type);
-    document.getElementById('schedTime').value = sched.time || '08:00';
-
-    if (sched.days && sched.days.length) {
-        document.querySelectorAll('#dayCheckboxes input').forEach(cb => {
-            cb.checked = sched.days.includes(cb.value);
-        });
-    }
-    if (sched.one_time_date) {
-        document.getElementById('schedDate').value = sched.one_time_date;
-    }
-}
-
-function selectSchedule(type) {
-    document.querySelectorAll('.schedule-option').forEach(el => el.classList.remove('active'));
-    const radio = document.getElementById('sched_' + (type === 'specific_days' ? 'specific' : (type === 'one_time' ? 'once' : type)));
-    if (radio) {
-        radio.checked = true;
-        radio.closest('.schedule-option').classList.add('active');
-    }
-
-    document.getElementById('dayCheckboxes').style.display = type === 'specific_days' ? 'flex' : 'none';
-    document.getElementById('datePicker').style.display = type === 'one_time' ? 'block' : 'none';
-
-    config.schedule = config.schedule || {};
-    config.schedule.type = type;
-}
-
-function getScheduleFromUI() {
-    const type = document.querySelector('input[name="schedType"]:checked')?.value || 'daily';
-    const time = document.getElementById('schedTime').value;
-    const days = [];
-    document.querySelectorAll('#dayCheckboxes input:checked').forEach(cb => days.push(cb.value));
-
-    let one_time_date = null;
-    if (type === 'one_time') {
-        const dateVal = document.getElementById('schedDate').value;
-        if (dateVal) {
-            // Convert yyyy-mm-dd to mm/dd/yyyy for schtasks
-            const [y, m, d] = dateVal.split('-');
-            one_time_date = `${m}/${d}/${y}`;
-        }
-    }
-    return { type, time, days, one_time_date };
-}
-
-async function checkScheduleStatus() {
-    const res = await fetch('/api/schedule/status');
-    const data = await res.json();
-    const el = document.getElementById('scheduleStatus');
-    if (data.active) {
-        el.className = 'schedule-status active';
-        el.innerHTML = `&#9989; Schedule active — Next run: ${data.next_run} (Status: ${data.status})`;
-    } else {
-        el.className = 'schedule-status inactive';
-        el.innerHTML = '&#9888; No schedule set — Reports will not be sent automatically';
-    }
-}
-
-// ─── Actions ───
-async function saveConfig() {
-    config.schedule = getScheduleFromUI();
-    const res = await fetch('/api/config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config)
-    });
-    if (res.ok) toast('Config saved!', 'success');
-    else toast('Failed to save config', 'error');
-}
-
-async function saveSchedule() {
-    config.schedule = getScheduleFromUI();
-    // Save config first
-    await fetch('/api/config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config)
-    });
-    // Create schedule
-    const res = await fetch('/api/schedule', { method: 'POST' });
-    const data = await res.json();
-    if (res.ok) {
-        toast(data.message || 'Schedule saved!', 'success');
-        checkScheduleStatus();
-    } else {
-        toast(data.error || 'Failed — try running as Administrator', 'error');
-    }
-}
-
-async function deleteSchedule() {
-    const res = await fetch('/api/schedule', { method: 'DELETE' });
-    if (res.ok) {
-        toast('Schedule removed', 'success');
-        checkScheduleStatus();
-    } else {
-        toast('No schedule to remove', 'info');
-    }
-}
-
-async function sendNow() {
-    const enabledCount = Object.values(config.report_pages).filter(p => p.enabled).length;
-    if (enabledCount === 0) { toast('No reports selected!', 'error'); return; }
-    if (config.recipients.length === 0) { toast('No recipients!', 'error'); return; }
-
-    showOverlay(`Sending ${enabledCount} report(s) to ${config.recipients.length} recipient(s)...`);
-    try {
-        // Save config first
-        config.schedule = getScheduleFromUI();
-        await fetch('/api/config', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(config)
-        });
-
-        const res = await fetch('/api/send-now', { method: 'POST' });
-        const data = await res.json();
-        if (res.ok) {
-            toast('Reports sent successfully!', 'success');
-        } else {
-            toast(data.error || 'Send failed', 'error');
-        }
-    } catch (e) {
-        toast('Error: ' + e.message, 'error');
-    }
-    hideOverlay();
-}
-
-// ─── Helpers ───
-function showOverlay(text) {
-    document.getElementById('overlayText').textContent = text;
-    document.getElementById('overlay').classList.add('active');
-}
-function hideOverlay() {
-    document.getElementById('overlay').classList.remove('active');
-}
-
-function toast(msg, type = 'info') {
-    const t = document.createElement('div');
-    t.className = `toast ${type}`;
-    t.textContent = msg;
-    document.body.appendChild(t);
-    setTimeout(() => t.remove(), 4000);
-}
-
-// Start
 init();
 </script>
 </body>

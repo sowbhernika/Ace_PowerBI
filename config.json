@@ -1,11 +1,161 @@
 {
   "recipients": [
-    "+919566649907",
-    "+919751344188",
-    "+918883821731"
+    {
+      "companies": [
+        "ALL"
+      ],
+      "dept": "IT",
+      "name": "Velmurugan",
+      "phone": "+919566649907"
+    },
+    {
+      "companies": [
+        "ALL"
+      ],
+      "dept": "IT&SAP",
+      "name": "Muthukumar",
+      "phone": "+919751344188"
+    },
+    {
+      "companies": [
+        "ALL"
+      ],
+      "dept": "IT&SAP",
+      "name": "Sriram",
+      "phone": "+918883821731"
+    },
+    {
+      "companies": [
+        "ALL"
+      ],
+      "dept": "Operations",
+      "name": "Suresh",
+      "phone": "+919842856707"
+    },
+    {
+      "companies": [
+        "AMC"
+      ],
+      "dept": "Paint Shop",
+      "name": "Kalimuthu",
+      "phone": "+919585534000"
+    },
+    {
+      "companies": [
+        "AMC"
+      ],
+      "dept": "Accounts & Finance",
+      "name": "Jotheeswaran",
+      "phone": "+919626407867"
+    },
+    {
+      "companies": [
+        "APE"
+      ],
+      "dept": "Operation",
+      "name": "Marimuthu",
+      "phone": "+919952207250"
+    },
+    {
+      "companies": [
+        "APE"
+      ],
+      "dept": "Operations",
+      "name": "Karthik",
+      "phone": "+919047075445"
+    },
+    {
+      "companies": [
+        "APE"
+      ],
+      "dept": "Accounts & Finanace",
+      "name": "Karpagavalli",
+      "phone": "+919524977000"
+    },
+    {
+      "companies": [
+        "ALL"
+      ],
+      "dept": "Management",
+      "name": "Srinivasan",
+      "phone": "+919894255554"
+    },
+    {
+      "companies": [
+        "ALL"
+      ],
+      "dept": "Quality",
+      "name": "Arun Siddharthan",
+      "phone": "+919500039408"
+    },
+    {
+      "companies": [
+        "ALL"
+      ],
+      "dept": "Accounts & FInance",
+      "name": "Lokesh",
+      "phone": "+919940137461"
+    },
+    {
+      "companies": [
+        "ALL"
+      ],
+      "dept": "Management",
+      "name": "Vanithamani Mahendran",
+      "phone": "+919150022817"
+    },
+    {
+      "companies": [
+        "ALL"
+      ],
+      "dept": "Quality",
+      "name": "Arun S",
+      "phone": "+918940899999"
+    },
+    {
+      "companies": [
+        "ALL"
+      ],
+      "dept": "IT & SAP",
+      "name": "Nisha",
+      "phone": "+919788216171"
+    },
+    {
+      "companies": [
+        "AHF"
+      ],
+      "dept": "IT & SAP",
+      "name": "Suresh OH",
+      "phone": "+918925156665"
+    },
+    {
+      "companies": [
+        "AHF"
+      ],
+      "dept": "IT & SAP",
+      "name": "MH Bala",
+      "phone": "+918925811208"
+    },
+    {
+      "companies": [
+        "APE"
+      ],
+      "dept": "IT & SAP",
+      "name": "OH",
+      "phone": "+918925811212"
+    },
+    {
+      "companies": [
+        "ALL"
+      ],
+      "dept": "IT",
+      "name": "Sowbhernika",
+      "phone": "+919884063814"
+    }
   ],
   "report_pages": {
     "AHF_Material_Matching": {
+      "company": "AHF",
       "enabled": false,
       "filters": [
         "week"
@@ -15,6 +165,7 @@
       "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
     },
     "AMC_Material_Matching": {
+      "company": "AMC",
       "enabled": false,
       "filters": [
         "week"
@@ -24,6 +175,7 @@
       "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
     },
     "APE_Material_Matching": {
+      "company": "APE",
       "enabled": false,
       "filters": [
         "week"
@@ -33,6 +185,7 @@
       "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
     },
     "APE_Report_Job_Work": {
+      "company": "APE",
       "enabled": false,
       "filters": [],
       "page": "38e39e62b1d3c56d60a5",
@@ -40,6 +193,7 @@
       "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
     },
     "APE_Report_WM": {
+      "company": "APE",
       "enabled": false,
       "filters": [],
       "page": "fd2644f3e7b3471e0cdb",
@@ -47,7 +201,8 @@
       "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
     },
     "Baywise_AHF_Production": {
-      "enabled": false,
+      "company": "AHF",
+      "enabled": true,
       "filters": [
         "date_to_today"
       ],
@@ -56,6 +211,7 @@
       "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
     },
     "Baywise_AHF_Sales": {
+      "company": "AHF",
       "enabled": true,
       "filters": [
         "date_to_today"
@@ -65,7 +221,8 @@
       "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
     },
     "Baywise_AMC_Production": {
-      "enabled": false,
+      "company": "AMC",
+      "enabled": true,
       "filters": [
         "date_to_today"
       ],
@@ -74,6 +231,7 @@
       "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
     },
     "Baywise_AMC_Sales": {
+      "company": "AMC",
       "enabled": true,
       "filters": [
         "date_to_today"
@@ -83,7 +241,8 @@
       "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
     },
     "Baywise_APE_Production": {
-      "enabled": false,
+      "company": "APE",
+      "enabled": true,
       "filters": [
         "date_to_today"
       ],
@@ -92,6 +251,7 @@
       "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
     },
     "Baywise_APE_Sales": {
+      "company": "APE",
       "enabled": true,
       "filters": [
         "date_to_today"
@@ -101,6 +261,7 @@
       "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
     },
     "Ontime_Delivery_AHF": {
+      "company": "AHF",
       "enabled": false,
       "filters": [
         {
@@ -114,6 +275,7 @@
       "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
     },
     "Ontime_Delivery_AMC": {
+      "company": "AMC",
       "enabled": false,
       "filters": [
         {
@@ -127,6 +289,7 @@
       "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
     },
     "Ontime_Delivery_APE": {
+      "company": "APE",
       "enabled": false,
       "filters": [
         {
@@ -140,6 +303,7 @@
       "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
     },
     "Ontime_Production_FG_Bay": {
+      "company": "GENERAL",
       "enabled": false,
       "filters": [],
       "page": "9cb90df6a9b5b7f0621c",
@@ -147,6 +311,7 @@
       "workspace": "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
     },
     "Ontime_Purchase_AMC_Material_Wise": {
+      "company": "AMC",
       "enabled": false,
       "filters": [],
       "page": "0fe25f55b95530d5b95d",
@@ -154,6 +319,7 @@
       "workspace": "me"
     },
     "Ontime_Purchase_AMC_PO_Creation": {
+      "company": "AMC",
       "enabled": false,
       "filters": [],
       "page": "ReportSectione875581f54d50092167c",
@@ -161,6 +327,7 @@
       "workspace": "me"
     },
     "Ontime_Purchase_APE_Material_Wise": {
+      "company": "APE",
       "enabled": false,
       "filters": [],
       "page": "97dba53009d73aa130c8",
@@ -168,6 +335,7 @@
       "workspace": "me"
     },
     "Ontime_Purchase_APE_PO_Creation": {
+      "company": "APE",
       "enabled": false,
       "filters": [],
       "page": "ReportSectione875581f54d50092167c",
@@ -175,6 +343,7 @@
       "workspace": "me"
     },
     "Production_Plan_vs_Actual_Baywise": {
+      "company": "GENERAL",
       "enabled": false,
       "filters": [],
       "page": "582bb7f7652b5dc13935",
@@ -182,6 +351,7 @@
       "workspace": "me"
     },
     "Production_Plan_vs_Actual_Material_Type": {
+      "company": "GENERAL",
       "enabled": false,
       "filters": [],
       "page": "f5308c51324fba683bf5",
@@ -191,7 +361,7 @@
   },
   "schedule": {
     "type": "daily",
-    "time": "08:00",
+    "time": "09:30",
     "days": [],
     "one_time_date": null
   }

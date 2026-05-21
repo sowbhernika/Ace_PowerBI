@@ -13,6 +13,7 @@ wa_chrome_profile/
 # Output files
 screenshots/
 *.log
+logs.json
 
 # IDE
 .vscode/
