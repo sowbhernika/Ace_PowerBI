@@ -15,6 +15,10 @@ screenshots/
 *.log
 logs.json
 
+# OpenWA (third-party repo + contains WhatsApp login session data)
+OpenWA/
+openwa_qr.png
+
 # IDE
 .vscode/
 .idea/

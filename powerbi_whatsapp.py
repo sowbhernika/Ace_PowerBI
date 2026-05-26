@@ -481,7 +481,7 @@ def send_whatsapp(filepath, targets=None, caption=""):
 
 def send_whatsapp_batch(screenshots, recipients, return_results=False):
     """Send all screenshots to all recipients using ONE browser session."""
-    from send_whatsapp_selenium import send_batch
+    from send_whatsapp_openwa import send_batch
 
     jobs = []
     for page_name, filepath in screenshots.items():
@@ -522,7 +522,7 @@ def send_whatsapp_routed(screenshots, report_companies, recipients, return_resul
     report_companies: {report_name: "AMC"/"AHF"/"APE"/"GENERAL"}
     recipients: [{name, phone, companies:[...]}]
     """
-    from send_whatsapp_selenium import send_batch
+    from send_whatsapp_openwa import send_batch
 
     jobs = []       # (filepath, phone, caption) for send_batch
     job_meta = []   # (report_name, phone, filepath, caption) parallel to jobs
@@ -557,7 +557,7 @@ def send_whatsapp_routed(screenshots, report_companies, recipients, return_resul
 
 def send_jobs(jobs):
     """Re-send a specific list of (filepath, phone, caption) jobs. Used by retry."""
-    from send_whatsapp_selenium import send_batch
+    from send_whatsapp_openwa import send_batch
     if not jobs:
         return []
     print(f"\n=== Retry send: {len(jobs)} messages ===", flush=True)
@@ -579,7 +579,9 @@ def run_from_config():
         config = json.load(f)
 
     enabled_pages = {k: v for k, v in config["report_pages"].items() if v.get("enabled")}
-    recipients = config.get("recipients", [])
+    # Only enabled managers (disabled ones are temporarily skipped)
+    recipients = [r for r in config.get("recipients", [])
+                  if not isinstance(r, dict) or r.get("enabled", True)]
 
     if not enabled_pages:
         print("No reports enabled.")
