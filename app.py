@@ -12,17 +12,19 @@ from datetime import datetime
 from pathlib import Path
 
 from flask import Flask, jsonify, render_template, request, send_file
+from flask_cors import CORS
 
 from powerbi_whatsapp import take_screenshot, take_screenshots_batch, send_whatsapp, get_report_url, kill_chrome
 
 app = Flask(__name__)
+CORS(app, origins=["*"])  # Allow frontend from any domain (Cloudflare)
 
-CONFIG_FILE = Path("d:/Ace_powerbi/config.json")
-LOGS_FILE = Path("d:/Ace_powerbi/logs.json")
-SCREENSHOTS_DIR = Path("d:/Ace_powerbi/screenshots")
+CONFIG_FILE = Path("config.json")
+LOGS_FILE = Path("logs/logs.json")
+SCREENSHOTS_DIR = Path("screenshots")
 TASK_NAME = "PowerBI_WhatsApp_Report"
-PYTHON_EXE = str(Path("d:/Ace_powerbi/venv/Scripts/python.exe"))
-SCRIPT_PATH = str(Path("d:/Ace_powerbi/powerbi_whatsapp.py"))
+PYTHON_EXE = str(Path("venv/Scripts/python.exe"))
+SCRIPT_PATH = str(Path("powerbi_whatsapp.py"))
 
 
 def active_recipients(recipients):
@@ -138,7 +140,7 @@ def connections():
         wa["detail"] = f"OpenWA offline ({str(e)[:40]})"
 
     # Power BI — check the saved Chrome profile exists (proxy for "logged in")
-    pbi_profile = Path("d:/Ace_powerbi/pbi_chrome_profile/Default")
+    pbi_profile = Path("profiles/pbi_brave_profile/Default")
     pbi = {"ok": pbi_profile.exists(),
            "detail": "Session saved" if pbi_profile.exists() else "Not logged in"}
 
@@ -565,6 +567,100 @@ def schedule_status():
         status = parts[2].strip('"') if len(parts) > 2 else "Unknown"
         return jsonify({"active": True, "next_run": next_run, "status": status})
     return jsonify({"active": False})
+
+
+
+@app.route("/api/connections", methods=["GET"])
+def check_connections():
+    """Check Power BI and WhatsApp connection status."""
+    # Power BI status (always assume logged in for now)
+    pbi_status = {"ok": True, "detail": "Logged in via browser profile"}
+    
+    # WhatsApp status via WhatsApp Web.js
+    wa_status = {"ok": False, "detail": "Not connected"}
+    try:
+        import requests
+        
+        r = requests.get("http://localhost:2786/api/status", timeout=8)
+        if r.status_code == 200:
+            data = r.json()
+            if data.get("authenticated", False):
+                wa_status = {
+                    "ok": True, 
+                    "detail": "Connected", 
+                    "status": data.get("status", "")
+                }
+            else:
+                wa_status = {"ok": False, "detail": f"Status: {data.get('status', 'Unknown')}"}
+        else:
+            wa_status = {"ok": False, "detail": "WhatsApp Web.js not responding"}
+    except Exception as e:
+        wa_status = {"ok": False, "detail": f"Error: {str(e)[:100]}"}
+    
+    return jsonify({"powerbi": pbi_status, "whatsapp": wa_status})
+
+
+@app.route("/api/whatsapp/qr", methods=["GET"])
+def get_whatsapp_qr():
+    """Get QR code for WhatsApp authentication."""
+    try:
+        import requests
+        
+        r = requests.get("http://localhost:2786/api/qr", timeout=10)
+        if r.status_code == 200:
+            return jsonify(r.json())
+        else:
+            return jsonify({
+                "success": False,
+                "message": "Failed to get QR code"
+            }), 500
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Error: {str(e)}"
+        }), 500
+
+
+@app.route("/api/whatsapp/connect", methods=["POST"])  
+def connect_whatsapp():
+    """Get WhatsApp connection status."""
+    try:
+        import requests
+        
+        r = requests.get("http://localhost:2786/api/status", timeout=8)
+        if r.status_code == 200:
+            return jsonify(r.json())
+        else:
+            return jsonify({
+                "success": False,
+                "message": "Failed to check status"
+            }), 500
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Error: {str(e)}"
+        }), 500
+
+
+@app.route("/api/whatsapp/relink", methods=["POST"])
+def relink_whatsapp():
+    """Reinitialize WhatsApp connection."""
+    try:
+        import requests
+        
+        r = requests.post("http://localhost:2786/api/relink", timeout=10)
+        if r.status_code == 200:
+            return jsonify(r.json())
+        else:
+            return jsonify({
+                "success": False,
+                "message": "Failed to relink"
+            }), 500
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Error: {str(e)}"
+        }), 500
 
 
 if __name__ == "__main__":

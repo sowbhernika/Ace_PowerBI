@@ -24,9 +24,9 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 
 # Config
-SCREENSHOTS_DIR = Path("d:/Ace_powerbi/screenshots")
-PBI_PROFILE_DIR = Path("d:/Ace_powerbi/pbi_chrome_profile")
-CHROME_PATH = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+SCREENSHOTS_DIR = Path("screenshots")
+PBI_PROFILE_DIR = Path("profiles/pbi_brave_profile")
+BRAVE_PATH = r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"
 VIEWPORT_WIDTH = 1920
 VIEWPORT_HEIGHT = 1080
 WS = "ad1c9ec1-c5c4-4715-b882-faf093d0042b"
@@ -191,7 +191,7 @@ def get_report_url(workspace, report, page):
 
 def get_pbi_driver(headless=True):
     options = Options()
-    options.binary_location = CHROME_PATH
+    options.binary_location = BRAVE_PATH
     options.add_argument(f"--user-data-dir={PBI_PROFILE_DIR}")
     options.add_argument("--profile-directory=Default")
     options.add_argument("--no-sandbox")
@@ -570,7 +570,7 @@ def send_jobs(jobs):
 
 def run_from_config():
     """Run using config.json (used by scheduled task and web UI)."""
-    config_file = Path("d:/Ace_powerbi/config.json")
+    config_file = Path("config.json")
     if not config_file.exists():
         print("ERROR: config.json not found.")
         sys.exit(1)

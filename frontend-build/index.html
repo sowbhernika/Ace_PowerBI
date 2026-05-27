@@ -224,8 +224,7 @@
       <div><div class="nm">ReportFlow</div><div class="tg">PowerBI → WhatsApp</div></div>
     </div>
     <nav class="nav">
-      <div class="tab active" data-tab="flow" onclick="switchTab('flow')"><span class="ic">📊</span><span>Flow Dashboard</span><span class="badge" id="flowBadge">●</span></div>
-      <div class="tab" data-tab="reports" onclick="switchTab('reports')"><span class="ic">▦</span><span>Reports</span><span class="badge" id="repBadge">0</span></div>
+      <div class="tab active" data-tab="reports" onclick="switchTab('reports')"><span class="ic">▦</span><span>Reports</span><span class="badge" id="repBadge">0</span></div>
       <div class="tab" data-tab="recipients" onclick="switchTab('recipients')"><span class="ic">◷</span><span>Managers</span><span class="badge" id="recBadge">0</span></div>
       <div class="tab" data-tab="whatsapp" onclick="switchTab('whatsapp')"><span class="ic">📱</span><span>WhatsApp</span><span class="badge" id="waBadge">●</span></div>
       <div class="tab" data-tab="schedule" onclick="switchTab('schedule')"><span class="ic">◴</span><span>Schedule</span></div>
@@ -249,96 +248,8 @@
     </div>
 
     <div class="content">
-      <!-- FLOW DASHBOARD -->
-      <div class="panel active" id="panel-flow">
-        <div class="hint"><span class="i">📊</span><div>Monitor the complete report flow from Power BI generation to WhatsApp delivery. Track system status and manage the automation pipeline.</div></div>
-        <div class="phead">
-          <div><h2>Flow Dashboard</h2><p>Complete pipeline monitoring and control center.</p></div>
-          <div class="toolbar">
-            <button class="btn btn-primary btn-sm" onclick="refreshFlowData()">↻ Refresh Status</button>
-            <button class="btn btn-ghost btn-sm" onclick="sendNow()">🚀 Send Now</button>
-          </div>
-        </div>
-
-        <!-- System Status -->
-        <div class="stat-row" style="margin-bottom: 20px;">
-          <div class="stat">
-            <div class="n" id="flowReportsCount">0</div>
-            <div class="l">Reports Enabled</div>
-          </div>
-          <div class="stat">
-            <div class="n" id="flowManagersCount">0</div>
-            <div class="l">Active Managers</div>
-          </div>
-          <div class="stat">
-            <div class="n" id="flowLastRunTime">Never</div>
-            <div class="l">Last Run</div>
-          </div>
-          <div class="stat">
-            <div class="n" id="flowSuccessRate">0%</div>
-            <div class="l">Success Rate</div>
-          </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="card pad" style="margin-bottom: 20px;">
-          <h3 style="margin-bottom: 15px;">⚡ Quick Actions</h3>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-            <button class="btn btn-primary" onclick="sendNow()" style="padding: 12px;">
-              🚀 Send Reports Now
-            </button>
-            <button class="btn btn-ghost" onclick="switchTab('reports')" style="padding: 12px;">
-              📊 Manage Reports
-            </button>
-            <button class="btn btn-ghost" onclick="switchTab('recipients')" style="padding: 12px;">
-              👥 Manage Recipients
-            </button>
-            <button class="btn btn-ghost" onclick="switchTab('whatsapp')" style="padding: 12px;">
-              📱 WhatsApp Setup
-            </button>
-          </div>
-        </div>
-
-        <!-- Service Status -->
-        <div class="conn-grid">
-          <div class="conn-card">
-            <div class="head">
-              <div class="ic">📊</div>
-              <h3>Power BI Reports</h3>
-            </div>
-            <div class="st">
-              <span class="bd off" id="pbiStatusBadge"></span>
-              <span id="pbiStatusText">Checking...</span>
-            </div>
-            <div class="meta" id="pbiStatusDetails">Report generation and thumbnails</div>
-          </div>
-          
-          <div class="conn-card">
-            <div class="head">
-              <div class="ic">📱</div>
-              <h3>WhatsApp Connection</h3>
-            </div>
-            <div class="st">
-              <span class="bd off" id="waStatusBadge"></span>
-              <span id="waStatusText">Checking...</span>
-            </div>
-            <div class="meta" id="waStatusDetails">Message delivery service</div>
-          </div>
-        </div>
-
-        <!-- Recent Activity -->
-        <div class="card" style="margin-top: 20px;">
-          <div style="padding: 16px; border-bottom: 1px solid var(--line);">
-            <h3>📈 Recent Activity</h3>
-          </div>
-          <div id="flowActivityFeed" style="max-height: 200px; overflow-y: auto;">
-            <div class="empty" style="padding: 20px;">Loading activity...</div>
-          </div>
-        </div>
-      </div>
-
       <!-- REPORTS -->
-      <div class="panel" id="panel-reports">
+      <div class="panel active" id="panel-reports">
         <div class="hint"><span class="i">ℹ</span><div>Turn ON the reports to include. Each is tagged by company — a report reaches <b>only managers of that company</b> (GENERAL goes to all). Click a preview to enlarge.</div></div>
         <div class="phead">
           <div><h2>Report Pages</h2><p>Toggle which dashboards to include in the next send.</p></div>
@@ -547,7 +458,7 @@
 // Configuration and globals
 let config = {};
 const sel = new Set();
-const TITLES = {flow:'Flow Dashboard', reports:'Reports', recipients:'Managers', whatsapp:'WhatsApp Management', schedule:'Schedule', logs:'Send History', setup:'Setup & Connection'};
+const TITLES = {reports:'Reports', recipients:'Managers', whatsapp:'WhatsApp Management', schedule:'Schedule', logs:'Send History', setup:'Setup & Connection'};
 
 let API_BASE_URL = localStorage.getItem('api_base_url') || 'http://localhost:5001';
 
@@ -605,7 +516,6 @@ function switchTab(t){
   if(t==='logs') loadLogs();
   if(t==='setup') loadConnections();
   if(t==='whatsapp') loadWhatsAppStatus();
-  if(t==='flow') loadFlowDashboard();
 }
 
 // ---- Connections / WhatsApp link ----
@@ -1199,104 +1109,6 @@ async function pollSend(){
 }
 async function cancelSend(){ await fetch(apiUrl('/api/send-cancel'),{method:'POST'}); document.getElementById('ovText').textContent='Cancelling…'; }
 function showOvCancel(t){ document.getElementById('ovText').textContent=t; document.getElementById('ovCancel').style.display='inline-flex'; document.getElementById('overlay').classList.add('on'); }
-
-// ---- Flow Dashboard ----
-async function loadFlowDashboard() {
-  try {
-    // Load reports count
-    const enabledReports = Object.values(config.report_pages || {}).filter(p => p.enabled).length;
-    document.getElementById('flowReportsCount').textContent = enabledReports;
-    
-    // Load managers count
-    const activeManagers = (config.recipients || []).filter(r => r.enabled !== false).length;
-    document.getElementById('flowManagersCount').textContent = activeManagers;
-    
-    // Load recent logs for success rate and last run
-    try {
-      const logsRes = await fetch(apiUrl('/api/logs'));
-      const logs = await logsRes.json();
-      
-      if (logs.length > 0) {
-        const lastLog = logs[0];
-        document.getElementById('flowLastRunTime').textContent = lastLog.time;
-        
-        // Calculate success rate from recent logs
-        const recentLogs = logs.slice(0, 10); // Last 10 runs
-        const successful = recentLogs.filter(l => l.status === 'SUCCESS').length;
-        const successRate = recentLogs.length > 0 ? Math.round((successful / recentLogs.length) * 100) : 0;
-        document.getElementById('flowSuccessRate').textContent = successRate + '%';
-      }
-    } catch (e) {
-      console.log('Could not load logs for flow dashboard');
-    }
-    
-    // Check Power BI status
-    try {
-      const reportsCount = Object.keys(config.report_pages || {}).length;
-      document.getElementById('pbiStatusBadge').className = 'bd ' + (reportsCount > 0 ? 'on' : 'off');
-      document.getElementById('pbiStatusText').textContent = reportsCount > 0 ? 'Connected' : 'No reports';
-      document.getElementById('pbiStatusDetails').textContent = `${reportsCount} reports configured`;
-    } catch (e) {
-      document.getElementById('pbiStatusBadge').className = 'bd off';
-      document.getElementById('pbiStatusText').textContent = 'Error';
-    }
-    
-    // Check WhatsApp status
-    try {
-      const waRes = await fetch('http://localhost:2786/api/status');
-      const waData = await waRes.json();
-      document.getElementById('waStatusBadge').className = 'bd ' + (waData.authenticated ? 'on' : 'off');
-      document.getElementById('waStatusText').textContent = waData.authenticated ? 'Connected' : 'Not connected';
-      document.getElementById('waStatusDetails').textContent = waData.authenticated ? 'WhatsApp Web.js active' : `Status: ${waData.status}`;
-    } catch (e) {
-      document.getElementById('waStatusBadge').className = 'bd off';
-      document.getElementById('waStatusText').textContent = 'Offline';
-      document.getElementById('waStatusDetails').textContent = 'WhatsApp service not responding';
-    }
-    
-    // Load recent activity
-    loadFlowActivity();
-    
-  } catch (error) {
-    console.error('Error loading flow dashboard:', error);
-  }
-}
-
-async function loadFlowActivity() {
-  try {
-    const logsRes = await fetch(apiUrl('/api/logs'));
-    const logs = await logsRes.json();
-    
-    const activityFeed = document.getElementById('flowActivityFeed');
-    if (logs.length === 0) {
-      activityFeed.innerHTML = '<div class="empty" style="padding: 20px;">No recent activity</div>';
-      return;
-    }
-    
-    const recentLogs = logs.slice(0, 5); // Show last 5 activities
-    const activityHtml = recentLogs.map(log => `
-      <div style="padding: 12px 16px; border-bottom: 1px solid var(--line2); display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <div style="font-size: 13px; font-weight: 600;">
-            ${log.status === 'SUCCESS' ? '✅' : log.status === 'PARTIAL' ? '⚠️' : '❌'} 
-            ${log.recipients} managers • ${log.sent} sent ${log.failed ? '• ' + log.failed + ' failed' : ''}
-          </div>
-          <div style="font-size: 11px; color: var(--muted); margin-top: 2px;">${log.time}</div>
-        </div>
-        <span class="pill ${log.status === 'SUCCESS' ? 'green' : log.status === 'PARTIAL' ? 'amber' : 'red'}">${log.status}</span>
-      </div>
-    `).join('');
-    
-    activityFeed.innerHTML = activityHtml;
-  } catch (e) {
-    document.getElementById('flowActivityFeed').innerHTML = '<div class="empty" style="padding: 20px;">Could not load activity</div>';
-  }
-}
-
-async function refreshFlowData() {
-  await loadFlowDashboard();
-  toast('Flow dashboard refreshed', 'success');
-}
 
 // ---- helpers ----
 async function saveConfig(){ config.schedule=getSched(); await fetch(apiUrl('/api/config'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(config)}); }
