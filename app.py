@@ -115,31 +115,29 @@ def index():
     return render_template("index.html")
 
 
+GATEWAY_URL = "http://localhost:2786"  # OpenWA Node gateway (whatsapp-web.js, no Docker)
+
+
 @app.route("/api/connections", methods=["GET"])
 def connections():
-    """Report status of Power BI login and WhatsApp (OpenWA) connection."""
-    # WhatsApp / OpenWA
-    wa = {"ok": False, "detail": "Not reachable", "phone": "", "name": ""}
+    """Report status of Power BI login and WhatsApp (gateway) connection."""
+    wa = {"ok": False, "detail": "Gateway offline", "phone": "", "name": ""}
     try:
         import requests
-        from send_whatsapp_openwa import OPENWA_URL, OPENWA_API_KEY, OPENWA_SESSION_ID
-        r = requests.get(f"{OPENWA_URL}/api/sessions/{OPENWA_SESSION_ID}",
-                         headers={"X-API-Key": OPENWA_API_KEY}, timeout=6)
+        r = requests.get(f"{GATEWAY_URL}/api/status", timeout=6)
         if r.status_code == 200:
             d = r.json()
             st = d.get("status", "")
-            wa["phone"] = d.get("phone", "") or ""
-            wa["name"] = d.get("pushName", "") or ""
-            if st in ("ready", "connected", "WORKING"):
+            if d.get("authenticated") or st in ("authenticated", "ready", "connected"):
                 wa.update({"ok": True, "detail": "Connected"})
-            elif st == "qr_ready":
+            elif d.get("has_qr") or st == "qr_ready":
                 wa["detail"] = "Needs QR scan"
             else:
-                wa["detail"] = f"Status: {st or 'unknown'}"
-    except Exception as e:
-        wa["detail"] = f"OpenWA offline ({str(e)[:40]})"
+                wa["detail"] = f"Status: {st or 'connecting'}"
+    except Exception:
+        wa["detail"] = "Gateway offline — start whatsapp-gateway"
 
-    # Power BI — check the saved Chrome profile exists (proxy for "logged in")
+    # Power BI — saved Brave profile = logged in
     pbi_profile = Path("profiles/pbi_brave_profile/Default")
     pbi = {"ok": pbi_profile.exists(),
            "detail": "Session saved" if pbi_profile.exists() else "Not logged in"}
@@ -149,100 +147,47 @@ def connections():
 
 @app.route("/api/whatsapp/connect", methods=["POST"])
 def whatsapp_connect():
-    """Trigger OpenWA session reconnect (no QR needed if login persisted)."""
+    """Check/wait for the gateway WhatsApp session (auto-restores saved login)."""
     try:
         from send_whatsapp_openwa import ensure_session_ready
-        ok = ensure_session_ready()
-        if ok:
+        if ensure_session_ready():
             return jsonify({"status": "ok", "message": "WhatsApp connected"})
-        return jsonify({"error": "Could not connect — link with a QR scan below, and check Docker is running."}), 500
+        return jsonify({"error": "Not connected. Use 'Link with QR' and scan from your phone. Is the gateway running?"}), 500
     except Exception as e:
         return jsonify({"error": f"Connect failed: {str(e)[:150]}"}), 500
 
 
 @app.route("/api/whatsapp/relink", methods=["POST"])
 def whatsapp_relink():
-    """Log out the current number and prepare a fresh QR for a NEW number."""
+    """Log out current number and produce a fresh QR for a NEW number."""
     try:
-        import requests, time as _t, subprocess
-        from send_whatsapp_openwa import (OPENWA_URL, OPENWA_API_KEY,
-                                          OPENWA_SESSION_ID, OPENWA_CONTAINER)
-        hdr = {"X-API-Key": OPENWA_API_KEY}
-
-        # 1. Stop the session (disconnect the browser)
-        try:
-            requests.post(f"{OPENWA_URL}/api/sessions/{OPENWA_SESSION_ID}/stop",
-                          headers=hdr, timeout=15)
-        except Exception:
-            pass
-        _t.sleep(2)
-
-        # 2. Wipe the saved WhatsApp auth so it forgets the old number
-        subprocess.run(
-            ["docker", "exec", OPENWA_CONTAINER, "sh", "-c",
-             "rm -rf /app/data/sessions/session-*/* 2>/dev/null || true"],
-            capture_output=True, timeout=20
-        )
-        _t.sleep(1)
-
-        # 3. Start fresh — this will produce a brand-new QR
-        requests.post(f"{OPENWA_URL}/api/sessions/{OPENWA_SESSION_ID}/start",
-                      headers=hdr, timeout=15)
-
-        # 4. Poll for the fresh QR
+        import requests, time as _t
+        requests.post(f"{GATEWAY_URL}/api/relink", timeout=10)
+        # poll for the fresh QR
         for _ in range(15):
-            q = requests.get(f"{OPENWA_URL}/api/sessions/{OPENWA_SESSION_ID}/qr",
-                             headers=hdr, timeout=8)
-            if q.status_code == 200:
-                qr = q.json().get("qrCode", "")
-                if qr.startswith("data:image"):
-                    return jsonify({"qr": qr})
+            q = requests.get(f"{GATEWAY_URL}/api/qr", timeout=8).json()
+            if q.get("qr"):
+                return jsonify({"qr": q["qr"]})
             _t.sleep(2)
         return jsonify({"error": "Fresh QR not ready yet — click again in a moment."}), 200
     except Exception as e:
-        return jsonify({"error": f"Relink failed: {str(e)[:150]}. Is Docker/OpenWA running?"}), 500
+        return jsonify({"error": f"Relink failed: {str(e)[:150]}. Is the gateway running?"}), 500
 
 
 @app.route("/api/whatsapp/qr", methods=["GET"])
 def whatsapp_qr():
-    """Start the session if needed and return the QR code (base64) for linking."""
+    """Return the QR for linking, or {connected:true} if already authenticated."""
     try:
         import requests
-        from send_whatsapp_openwa import (OPENWA_URL, OPENWA_API_KEY,
-                                          OPENWA_SESSION_ID, _clear_chromium_locks)
-        hdr = {"X-API-Key": OPENWA_API_KEY}
-
-        # Check current status
-        s = requests.get(f"{OPENWA_URL}/api/sessions/{OPENWA_SESSION_ID}",
-                         headers=hdr, timeout=8).json()
-        status = s.get("status", "")
-        if status in ("ready", "connected", "WORKING"):
+        r = requests.get(f"{GATEWAY_URL}/api/qr", timeout=8).json()
+        if r.get("authenticated"):
             return jsonify({"connected": True})
-
-        # Need to (re)start the session to produce a QR
-        _clear_chromium_locks()
-        requests.post(f"{OPENWA_URL}/api/sessions/{OPENWA_SESSION_ID}/start",
-                      headers=hdr, timeout=15)
-
-        # Poll briefly for the QR to appear
-        import time as _t
-        for _ in range(12):
-            q = requests.get(f"{OPENWA_URL}/api/sessions/{OPENWA_SESSION_ID}/qr",
-                             headers=hdr, timeout=8)
-            if q.status_code == 200:
-                qr = q.json().get("qrCode", "")
-                if qr.startswith("data:image"):
-                    return jsonify({"connected": False, "qr": qr})
-            # maybe it connected from a saved session
-            st = requests.get(f"{OPENWA_URL}/api/sessions/{OPENWA_SESSION_ID}",
-                              headers=hdr, timeout=8).json().get("status", "")
-            if st in ("ready", "connected", "WORKING"):
-                return jsonify({"connected": True})
-            _t.sleep(2)
+        if r.get("qr"):
+            return jsonify({"connected": False, "qr": r["qr"]})
         return jsonify({"connected": False, "qr": None,
                         "error": "QR not ready yet — try again in a moment."})
     except Exception as e:
-        return jsonify({"error": f"QR error: {str(e)[:150]}. Is Docker/OpenWA running?"}), 500
+        return jsonify({"error": f"QR error: {str(e)[:150]}. Is the gateway running?"}), 500
 
 
 @app.route("/api/config", methods=["GET"])
@@ -672,4 +617,4 @@ if __name__ == "__main__":
     SCREENSHOTS_DIR.mkdir(exist_ok=True)
     print("Starting Power BI WhatsApp Manager...")
     print("Open http://localhost:5000 in your browser")
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    app.run(host="0.0.0.0", port=5001, debug=False)

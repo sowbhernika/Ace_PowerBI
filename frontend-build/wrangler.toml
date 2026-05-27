@@ -1,9 +1,0 @@
-name = "reportflow-frontend"
-compatibility_date = "2023-12-01"
-
-[env.production.vars]
-ENVIRONMENT = "production"
-
-[[env.production.route]]
-pattern = "*"
-custom_domain = true

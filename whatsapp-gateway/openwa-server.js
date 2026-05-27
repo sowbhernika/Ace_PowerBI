@@ -1,4 +1,4 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const express = require('express');
 const QRCode = require('qrcode');
 const cors = require('cors');
@@ -8,7 +8,7 @@ app.use(cors({
     origin: ['http://localhost:5001', 'file://', 'null'],
     credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 
 let client = null;
 let qrCodeString = '';
@@ -194,6 +194,30 @@ app.post('/api/send', async (req, res) => {
         });
     }
 });
+
+// Send image endpoint (base64) — used for report screenshots
+app.post('/api/send-image', async (req, res) => {
+    try {
+        if (!isAuthenticated || !client) {
+            return res.status(400).json({ success: false, message: 'WhatsApp not authenticated' });
+        }
+        const { number, image, caption, filename } = req.body;
+        if (!number || !image) {
+            return res.status(400).json({ success: false, message: 'number and image (base64) are required' });
+        }
+        const chatId = number.includes('@c.us') ? number : `${number}@c.us`;
+        const b64 = image.includes(',') ? image.split(',')[1] : image; // strip data: prefix if present
+        const media = new MessageMedia('image/png', b64, filename || 'report.png');
+        await client.sendMessage(chatId, media, { caption: caption || '' });
+        res.json({ success: true, message: 'Image sent' });
+    } catch (error) {
+        console.error('Error sending image:', error);
+        res.status(500).json({ success: false, message: 'Error sending image', error: error.message });
+    }
+});
+
+// Allow the Flask backend (and large base64 images) through
+app.use((req, res, next) => { next(); });
 
 const PORT = 2786;
 

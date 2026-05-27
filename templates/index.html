@@ -203,19 +203,6 @@
 </head>
 <body>
 
-<!-- API Configuration Panel -->
-<button class="api-toggle" onclick="toggleApiConfig()">⚙ API Config</button>
-<div class="api-config hidden" id="apiConfig">
-  <h3>Backend API Configuration</h3>
-  <div class="field">
-    <label>API Base URL</label>
-    <input type="text" id="apiUrl" placeholder="http://localhost:5001" value="">
-  </div>
-  <div style="display: flex; gap: 8px;">
-    <button class="btn btn-primary btn-sm" onclick="saveApiConfig()">Save & Test</button>
-    <button class="btn btn-ghost btn-sm" onclick="toggleApiConfig()">Close</button>
-  </div>
-</div>
 
 <div class="app">
   <aside class="sidebar">
@@ -224,8 +211,7 @@
       <div><div class="nm">ReportFlow</div><div class="tg">PowerBI → WhatsApp</div></div>
     </div>
     <nav class="nav">
-      <div class="tab active" data-tab="flow" onclick="switchTab('flow')"><span class="ic">📊</span><span>Flow Dashboard</span><span class="badge" id="flowBadge">●</span></div>
-      <div class="tab" data-tab="reports" onclick="switchTab('reports')"><span class="ic">▦</span><span>Reports</span><span class="badge" id="repBadge">0</span></div>
+      <div class="tab active" data-tab="reports" onclick="switchTab('reports')"><span class="ic">▦</span><span>Reports</span><span class="badge" id="repBadge">0</span></div>
       <div class="tab" data-tab="recipients" onclick="switchTab('recipients')"><span class="ic">◷</span><span>Managers</span><span class="badge" id="recBadge">0</span></div>
       <div class="tab" data-tab="whatsapp" onclick="switchTab('whatsapp')"><span class="ic">📱</span><span>WhatsApp</span><span class="badge" id="waBadge">●</span></div>
       <div class="tab" data-tab="schedule" onclick="switchTab('schedule')"><span class="ic">◴</span><span>Schedule</span></div>
@@ -250,95 +236,7 @@
 
     <div class="content">
       <!-- FLOW DASHBOARD -->
-      <div class="panel active" id="panel-flow">
-        <div class="hint"><span class="i">📊</span><div>Monitor the complete report flow from Power BI generation to WhatsApp delivery. Track system status and manage the automation pipeline.</div></div>
-        <div class="phead">
-          <div><h2>Flow Dashboard</h2><p>Complete pipeline monitoring and control center.</p></div>
-          <div class="toolbar">
-            <button class="btn btn-primary btn-sm" onclick="refreshFlowData()">↻ Refresh Status</button>
-            <button class="btn btn-ghost btn-sm" onclick="sendNow()">🚀 Send Now</button>
-          </div>
-        </div>
-
-        <!-- System Status -->
-        <div class="stat-row" style="margin-bottom: 20px;">
-          <div class="stat">
-            <div class="n" id="flowReportsCount">0</div>
-            <div class="l">Reports Enabled</div>
-          </div>
-          <div class="stat">
-            <div class="n" id="flowManagersCount">0</div>
-            <div class="l">Active Managers</div>
-          </div>
-          <div class="stat">
-            <div class="n" id="flowLastRunTime">Never</div>
-            <div class="l">Last Run</div>
-          </div>
-          <div class="stat">
-            <div class="n" id="flowSuccessRate">0%</div>
-            <div class="l">Success Rate</div>
-          </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="card pad" style="margin-bottom: 20px;">
-          <h3 style="margin-bottom: 15px;">⚡ Quick Actions</h3>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-            <button class="btn btn-primary" onclick="sendNow()" style="padding: 12px;">
-              🚀 Send Reports Now
-            </button>
-            <button class="btn btn-ghost" onclick="switchTab('reports')" style="padding: 12px;">
-              📊 Manage Reports
-            </button>
-            <button class="btn btn-ghost" onclick="switchTab('recipients')" style="padding: 12px;">
-              👥 Manage Recipients
-            </button>
-            <button class="btn btn-ghost" onclick="switchTab('whatsapp')" style="padding: 12px;">
-              📱 WhatsApp Setup
-            </button>
-          </div>
-        </div>
-
-        <!-- Service Status -->
-        <div class="conn-grid">
-          <div class="conn-card">
-            <div class="head">
-              <div class="ic">📊</div>
-              <h3>Power BI Reports</h3>
-            </div>
-            <div class="st">
-              <span class="bd off" id="pbiStatusBadge"></span>
-              <span id="pbiStatusText">Checking...</span>
-            </div>
-            <div class="meta" id="pbiStatusDetails">Report generation and thumbnails</div>
-          </div>
-          
-          <div class="conn-card">
-            <div class="head">
-              <div class="ic">📱</div>
-              <h3>WhatsApp Connection</h3>
-            </div>
-            <div class="st">
-              <span class="bd off" id="waStatusBadge"></span>
-              <span id="waStatusText">Checking...</span>
-            </div>
-            <div class="meta" id="waStatusDetails">Message delivery service</div>
-          </div>
-        </div>
-
-        <!-- Recent Activity -->
-        <div class="card" style="margin-top: 20px;">
-          <div style="padding: 16px; border-bottom: 1px solid var(--line);">
-            <h3>📈 Recent Activity</h3>
-          </div>
-          <div id="flowActivityFeed" style="max-height: 200px; overflow-y: auto;">
-            <div class="empty" style="padding: 20px;">Loading activity...</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- REPORTS -->
-      <div class="panel" id="panel-reports">
+      <div class="panel active" id="panel-reports">
         <div class="hint"><span class="i">ℹ</span><div>Turn ON the reports to include. Each is tagged by company — a report reaches <b>only managers of that company</b> (GENERAL goes to all). Click a preview to enlarge.</div></div>
         <div class="phead">
           <div><h2>Report Pages</h2><p>Toggle which dashboards to include in the next send.</p></div>
@@ -444,92 +342,42 @@
 
       <!-- WHATSAPP -->
       <div class="panel" id="panel-whatsapp">
-        <div class="hint"><span class="i">ℹ</span><div>Manage WhatsApp connections and switch between different accounts. Each connection can be used independently for sending reports.</div></div>
+        <div class="hint"><span class="i">ℹ</span><div>This is the WhatsApp number that sends all reports. <b>Connect</b> reuses a saved login (no QR). <b>Link with QR</b> is for first-time linking. <b>Switch Number</b> logs out and links a different phone. The gateway must be running.</div></div>
         <div class="phead">
-          <div><h2>WhatsApp Management</h2><p>Connect and manage WhatsApp accounts for sending reports.</p></div>
+          <div><h2>WhatsApp Connection</h2><p>The account used to deliver reports.</p></div>
           <div class="toolbar">
-            <button class="btn btn-primary btn-sm" onclick="connectNewWhatsApp()">+ Add Connection</button>
-            <button class="btn btn-ghost btn-sm" onclick="refreshWhatsAppStatus()">↻ Refresh Status</button>
+            <button class="btn btn-green btn-sm" onclick="connectWhatsApp(this)">Connect</button>
+            <button class="btn btn-primary btn-sm" onclick="linkWhatsApp(this)">Link with QR</button>
+            <button class="btn btn-danger btn-sm" onclick="switchNumber(this)">Switch Number</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadConnections()">↻ Refresh</button>
           </div>
         </div>
-        
-        <!-- Connection Status Cards -->
-        <div class="conn-grid" id="waConnectionGrid">
+        <div class="conn-grid">
           <div class="conn-card">
-            <div class="head"><div class="ic">📱</div><h3>WhatsApp Web.js</h3></div>
-            <div class="st"><span class="bd off" id="waWebJsBadge"></span><span id="waWebJsStatus">Checking...</span></div>
-            <div class="meta" id="waWebJsDetails">Port 2786 - WhatsApp Web.js Integration</div>
-            <div class="actions" style="margin-top: 12px; display: flex; gap: 8px;">
-              <button class="btn btn-primary btn-sm" onclick="linkWhatsAppWebJs()" id="linkWebJs">Link with QR</button>
-              <button class="btn btn-ghost btn-sm" onclick="relinkWhatsAppWebJs()">Relink</button>
-            </div>
-          </div>
-          
-          <div class="conn-card">
-            <div class="head"><div class="ic">📱</div><h3>OpenWA Server</h3></div>
-            <div class="st"><span class="bd off" id="openWaBadge"></span><span id="openWaStatus">Checking...</span></div>
-            <div class="meta" id="openWaDetails">Port 2787 - OpenWA Integration</div>
-            <div class="actions" style="margin-top: 12px; display: flex; gap: 8px;">
-              <button class="btn btn-primary btn-sm" onclick="linkOpenWA()" id="linkOpenWa">Link with QR</button>
-              <button class="btn btn-ghost btn-sm" onclick="relinkOpenWA()">Relink</button>
-            </div>
+            <div class="head"><div class="ic">💬</div><h3>WhatsApp</h3></div>
+            <div class="st"><span class="bd off" id="waCardDot"></span><span id="waStatusText">Checking…</span></div>
+            <div class="meta" id="waMeta"></div>
+            <div class="steps">Gateway runs on port 2786 (no Docker). Start it with <code>setup_openwa_nodejs.bat</code> then <code>node whatsapp-gateway/openwa-server.js</code>.</div>
           </div>
         </div>
-        
-        <!-- Active Connection Selector -->
-        <div class="card pad" style="margin-bottom: 20px;">
-          <h3 style="margin-bottom: 12px;">Active Connection</h3>
-          <div class="form-row">
-            <div class="field">
-              <label>Select WhatsApp Service for Sending</label>
-              <select id="activeWhatsAppService" onchange="setActiveWhatsAppService()">
-                <option value="webjs">WhatsApp Web.js (Port 2786)</option>
-                <option value="openwa">OpenWA Server (Port 2787)</option>
-              </select>
-            </div>
-          </div>
-          <div id="activeConnectionStatus" style="margin-top: 10px; padding: 10px; background: var(--bg); border-radius: 6px; font-size: 13px;"></div>
-        </div>
-        
-        <!-- QR Code Display -->
-        <div class="qrbox" id="waQrBox" style="display: none;">
-          <img id="waQrImg" src="" alt="WhatsApp QR Code">
-          <div class="steps">Open <b>WhatsApp</b> on your phone → <b>Settings → Linked Devices → Link a Device</b> → scan this code.<br>The QR code will refresh automatically.</div>
-          <button class="btn btn-ghost btn-sm" onclick="hideQrCode()" style="margin-top: 12px;">Hide QR Code</button>
-        </div>
-        
-        <!-- Connection Logs -->
-        <div class="card" style="margin-top: 20px;">
-          <div class="phead">
-            <div><h3>Connection Logs</h3></div>
-            <button class="btn btn-ghost btn-sm" onclick="clearWhatsAppLogs()">Clear Logs</button>
-          </div>
-          <div id="waConnectionLogs" style="max-height: 200px; overflow-y: auto; padding: 12px; background: var(--bg); border-radius: 6px; font-family: monospace; font-size: 12px; line-height: 1.4;">
-            <div style="color: var(--muted);">Connection logs will appear here...</div>
-          </div>
+        <div class="qrbox" id="qrbox2">
+          <img id="qrimg2" src="" alt="WhatsApp QR">
+          <div class="steps">Open <b>WhatsApp</b> on your phone → <b>Settings → Linked Devices → Link a Device</b> → scan this code. It auto-detects when linked.</div>
         </div>
       </div>
 
       <!-- SETUP -->
       <div class="panel" id="panel-setup">
-        <div class="phead"><div><h2>Setup &amp; Connection</h2><p>Connect Power BI and WhatsApp before sending.</p></div>
+        <div class="phead"><div><h2>Setup &amp; Connection</h2><p>Overview of Power BI and WhatsApp status.</p></div>
           <div class="toolbar">
-            <button class="btn btn-green btn-sm" onclick="connectWhatsApp(this)">Connect WhatsApp</button>
-            <button class="btn btn-primary btn-sm" onclick="linkWhatsApp(this)">Link with QR</button>
-            <button class="btn btn-danger btn-sm" onclick="switchNumber(this)">Switch Number</button>
-            <button class="btn btn-ghost btn-sm" onclick="loadConnections()">↻ Refresh</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadConnections()">↻ Refresh Status</button>
           </div></div>
         <div class="conn-grid" id="connGrid"><div class="conn-card"><div class="meta">Checking…</div></div></div>
-
-        <div class="qrbox" id="qrbox">
-          <img id="qrimg" src="" alt="WhatsApp QR">
-          <div class="steps">Open <b>WhatsApp</b> on your phone → <b>Settings → Linked Devices → Link a Device</b> → scan this code.<br>It refreshes automatically and connects when scanned.</div>
-        </div>
 
         <div class="guide">
           <h3>First-time setup</h3>
           <div class="gstep"><div class="num">1</div><div class="txt"><b>Login to Power BI</b> — double-click <code>login_powerbi.bat</code>, sign in with MFA, then press Enter in the terminal.</div></div>
-          <div class="gstep"><div class="num">2</div><div class="txt"><b>Connect WhatsApp</b> — make sure Docker is running, then click <b>Link with QR</b> above and scan from your phone. (If already linked before, just <b>Connect WhatsApp</b>.)</div></div>
+          <div class="gstep"><div class="num">2</div><div class="txt"><b>Start the WhatsApp gateway</b> — run <code>setup_openwa_nodejs.bat</code> once (installs it), then start it. Go to the <b>WhatsApp</b> tab and <b>Link with QR</b> to scan from your phone.</div></div>
           <div class="gstep"><div class="num">3</div><div class="txt"><b>Add managers</b> in the Managers tab with phone, company and department.</div></div>
           <div class="gstep"><div class="num">4</div><div class="txt"><b>Pick reports</b>, then <b>Send Now</b> — or set a <b>Schedule</b>.</div></div>
         </div>
@@ -547,40 +395,15 @@
 // Configuration and globals
 let config = {};
 const sel = new Set();
-const TITLES = {flow:'Flow Dashboard', reports:'Reports', recipients:'Managers', whatsapp:'WhatsApp Management', schedule:'Schedule', logs:'Send History', setup:'Setup & Connection'};
+const TITLES = {reports:'Reports', recipients:'Managers', whatsapp:'WhatsApp Management', schedule:'Schedule', logs:'Send History', setup:'Setup & Connection'};
 
-let API_BASE_URL = localStorage.getItem('api_base_url') || 'http://localhost:5001';
+// This template is served BY the Flask backend, so the API is same-origin.
+// Force relative URLs — works on any host/port and ignores stale saved values.
+localStorage.removeItem('api_base_url');
+let API_BASE_URL = '';
 
 function apiUrl(path) {
   return API_BASE_URL + path;
-}
-
-// API Configuration
-function toggleApiConfig() {
-  const panel = document.getElementById('apiConfig');
-  panel.classList.toggle('hidden');
-  if (!panel.classList.contains('hidden')) {
-    document.getElementById('apiUrl').value = API_BASE_URL;
-  }
-}
-
-async function saveApiConfig() {
-  const newUrl = document.getElementById('apiUrl').value.trim() || 'http://localhost:5001';
-  API_BASE_URL = newUrl;
-  localStorage.setItem('api_base_url', newUrl);
-  
-  try {
-    const response = await fetch(apiUrl('/api/config'));
-    if (response.ok) {
-      toast('API connection successful!', 'success');
-      toggleApiConfig();
-      init();
-    } else {
-      throw new Error('Invalid response');
-    }
-  } catch (error) {
-    toast('Failed to connect to API: ' + error.message, 'error');
-  }
 }
 
 // Initialize
@@ -605,43 +428,25 @@ function switchTab(t){
   if(t==='logs') loadLogs();
   if(t==='setup') loadConnections();
   if(t==='whatsapp') loadWhatsAppStatus();
-  if(t==='flow') loadFlowDashboard();
 }
 
-// ---- Connections / WhatsApp link ----
+// ---- Connections / WhatsApp (single number via Flask -> gateway 2786) ----
+let qrPoll=null;
 async function loadConnections(){
   const grid=document.getElementById('connGrid');
   try{
-    // Try direct WhatsApp Web.js status first, then fall back to Flask
-    let wa = {ok: false, detail: 'Checking...'};
-    try {
-      const waR = await fetch('http://localhost:2786/api/status');
-      const waD = await waR.json();
-      wa = {
-        ok: waD.authenticated || false,
-        detail: waD.authenticated ? 'Connected via WhatsApp Web.js' : `Status: ${waD.status}`,
-        name: waD.authenticated ? 'WhatsApp Web.js' : '',
-        phone: ''
-      };
-    } catch(e) {
-      wa = {ok: false, detail: 'WhatsApp Web.js server not responding'};
-    }
-    
-    // Get Power BI status from Flask
-    let pbi = {ok: true, detail: 'Logged in via browser profile'};
-    try {
-      const r = await fetch(apiUrl('/api/connections'));
-      const d = await r.json();
-      pbi = d.powerbi;
-    } catch(e) {
-      pbi = {ok: false, detail: 'Cannot connect to Flask backend'};
-    }
-    
-    const waDot = wa.ok?'on':(wa.detail&&wa.detail.includes('QR')?'warn':'off');
-    document.getElementById('sf-pbi').className='dot '+(pbi.ok?'on':'off');
-    document.getElementById('sf-wa').className='dot '+(wa.ok?'on':'off');
-    if(wa.ok) document.getElementById('qrbox').classList.remove('on');
-    grid.innerHTML=`
+    const r=await fetch(apiUrl('/api/connections')); const d=await r.json();
+    const wa=d.whatsapp, pbi=d.powerbi;
+    const waDot = wa.ok?'on':((wa.detail||'').includes('QR')?'warn':'off');
+    const sfp=document.getElementById('sf-pbi'); if(sfp) sfp.className='dot '+(pbi.ok?'on':'off');
+    const sfw=document.getElementById('sf-wa'); if(sfw) sfw.className='dot '+(wa.ok?'on':'off');
+    // WhatsApp tab card
+    const wb=document.getElementById('waCardDot'); if(wb) wb.className='bd '+waDot;
+    const wt=document.getElementById('waStatusText'); if(wt) wt.textContent = wa.ok?'Connected':wa.detail;
+    const wm=document.getElementById('waMeta'); if(wm) wm.textContent = wa.ok?(wa.name||''):'';
+    if(wa.ok){ const q=document.getElementById('qrbox2'); if(q) q.classList.remove('on'); }
+    // Setup tab grid
+    if(grid) grid.innerHTML=`
       <div class="conn-card">
         <div class="head"><div class="ic">📊</div><h3>Power BI</h3></div>
         <div class="st"><span class="bd ${pbi.ok?'on':'off'}"></span>${pbi.ok?'Logged in':'Not logged in'}</div>
@@ -651,11 +456,13 @@ async function loadConnections(){
       <div class="conn-card">
         <div class="head"><div class="ic">💬</div><h3>WhatsApp</h3></div>
         <div class="st"><span class="bd ${waDot}"></span>${wa.ok?'Connected':wa.detail}</div>
-        <div class="meta">${wa.ok?`${wa.name||''} ${wa.phone?('· +'+wa.phone):''}`:''}</div>
-        ${wa.ok?'':'<div class="steps">Click <b>Link with QR</b> to connect WhatsApp Web.js. Server status: <code>${wa.detail}</code></div>'}
+        <div class="meta">${wa.ok?(wa.name||''):''}</div>
+        ${wa.ok?'':'<div class="steps">Go to the <b>WhatsApp</b> tab and click <b>Link with QR</b>. Make sure the gateway (port 2786) is running.</div>'}
       </div>`;
-  }catch(e){ grid.innerHTML=`<div class="conn-card"><div class="meta" style="color:var(--red)">Status check failed: ${e.message}</div></div>`; }
+  }catch(e){ if(grid) grid.innerHTML=`<div class="conn-card"><div class="meta" style="color:var(--red)">Status check failed: ${e.message}</div></div>`; }
 }
+function loadWhatsAppStatus(){ loadConnections(); }
+
 async function connectWhatsApp(btn){
   btn.disabled=true; const o=btn.textContent; btn.textContent='Connecting…';
   try{ const r=await fetch(apiUrl('/api/whatsapp/connect'),{method:'POST'}); const d=await r.json();
@@ -663,76 +470,27 @@ async function connectWhatsApp(btn){
   }catch(e){ toast('Error: '+e.message,'error'); }
   btn.disabled=false; btn.textContent=o; loadConnections();
 }
-let qrPoll=null;
+function showQR(qr){
+  const img=document.getElementById('qrimg2'); const box=document.getElementById('qrbox2');
+  if(img&&box){ img.src=qr; box.classList.add('on'); box.scrollIntoView({behavior:'smooth'}); }
+}
 async function linkWhatsApp(btn){
   btn.disabled=true; const o=btn.textContent; btn.textContent='Loading QR…';
-  console.log('LinkWhatsApp clicked, trying to get QR code...');
-  
   try{
-    // Try direct connection to WhatsApp Web.js server first
-    let r, d;
-    console.log('Trying direct connection to WhatsApp Web.js server...');
-    
-    try {
-      r = await fetch('http://localhost:2786/api/qr');
-      d = await r.json();
-      console.log('Direct connection response:', d);
-    } catch(directError) {
-      console.log('Direct connection failed, trying Flask proxy:', directError.message);
-      // Fallback to Flask proxy
-      r = await fetch(apiUrl('/api/whatsapp/qr'));
-      d = await r.json();
-      console.log('Flask proxy response:', d);
-    }
-    
-    console.log('Final response data:', d);
-    
-    if(d.success && d.authenticated){ 
-      console.log('Already authenticated');
-      toast('Already connected','success'); 
-      loadConnections(); 
-    }
-    else if(d.success && d.qr){
-      console.log('Got QR code, displaying...');
-      document.getElementById('qrimg').src=d.qr;
-      document.getElementById('qrbox').classList.add('on');
-      document.getElementById('qrbox').scrollIntoView({behavior:'smooth'});
-      toast('Scan the QR with your phone','info');
-      startQrPoll();
-    } else if(d.connected){ 
-      console.log('Already connected (old format)');
-      toast('Already connected','success'); 
-      loadConnections(); 
-    }
-    else if(d.qr){
-      console.log('Got QR code (old format), displaying...');
-      document.getElementById('qrimg').src=d.qr;
-      document.getElementById('qrbox').classList.add('on');
-      document.getElementById('qrbox').scrollIntoView({behavior:'smooth'});
-      toast('Scan the QR with your phone','info');
-      startQrPoll();
-    } else {
-      console.log('No QR code in response');
-      toast(d.error||d.message||'QR not ready, try again','error');
-    }
-  }catch(e){ 
-    console.error('LinkWhatsApp error:', e);
-    toast('Error: '+e.message,'error'); 
-  }
+    const r=await fetch(apiUrl('/api/whatsapp/qr')); const d=await r.json();
+    if(d.connected){ toast('Already connected','success'); loadConnections(); }
+    else if(d.qr){ showQR(d.qr); toast('Scan the QR with your phone','info'); startQrPoll(); }
+    else toast(d.error||'QR not ready, try again','error');
+  }catch(e){ toast('Error: '+e.message,'error'); }
   btn.disabled=false; btn.textContent=o;
 }
 async function switchNumber(btn){
-  if(!confirm('Log out the current WhatsApp number and link a NEW one?\n\nThe current number will be disconnected and a fresh QR will appear to scan with the new phone.')) return;
+  if(!confirm('Log out the current WhatsApp number and link a NEW one?\n\nA fresh QR will appear to scan with the new phone.')) return;
   btn.disabled=true; const o=btn.textContent; btn.textContent='Logging out…';
   try{
     const r=await fetch(apiUrl('/api/whatsapp/relink'),{method:'POST'}); const d=await r.json();
-    if(d.qr){
-      document.getElementById('qrimg').src=d.qr;
-      document.getElementById('qrbox').classList.add('on');
-      document.getElementById('qrbox').scrollIntoView({behavior:'smooth'});
-      toast('Old number logged out. Scan with the NEW phone.','info');
-      startQrPoll();
-    } else toast(d.error||'Could not generate QR, try again','error');
+    if(d.qr){ showQR(d.qr); toast('Old number logged out. Scan with the NEW phone.','info'); startQrPoll(); }
+    else toast(d.error||'Could not generate QR, try again','error');
   }catch(e){ toast('Error: '+e.message,'error'); }
   btn.disabled=false; btn.textContent=o; loadConnections();
 }
@@ -743,253 +501,13 @@ function startQrPoll(){
     n++;
     try{
       const r=await fetch(apiUrl('/api/connections')); const d=await r.json();
-      if(d.whatsapp.ok){ clearInterval(qrPoll); document.getElementById('qrbox').classList.remove('on'); toast('WhatsApp linked!','success'); loadConnections(); return; }
-      // refresh QR every ~20s
-      if(n%4===0){ const q=await fetch(apiUrl('/api/whatsapp/qr')); const qd=await q.json(); if(qd.qr) document.getElementById('qrimg').src=qd.qr; if(qd.connected){clearInterval(qrPoll); document.getElementById('qrbox').classList.remove('on'); loadConnections();} }
+      if(d.whatsapp.ok){ clearInterval(qrPoll); const q=document.getElementById('qrbox2'); if(q)q.classList.remove('on'); toast('WhatsApp linked!','success'); loadConnections(); return; }
+      if(n%4===0){ const q=await fetch(apiUrl('/api/whatsapp/qr')); const qd=await q.json(); if(qd.qr) showQR(qd.qr); }
     }catch(e){}
-    if(n>40) clearInterval(qrPoll); // stop after ~3.5 min
+    if(n>40) clearInterval(qrPoll);
   }, 5000);
 }
 
-// ---- WhatsApp Management ----
-let waLogEntries = [];
-let currentWhatsAppService = localStorage.getItem('whatsapp_service') || 'webjs';
-
-async function loadWhatsAppStatus() {
-  addWhatsAppLog('Loading WhatsApp status...');
-  await refreshWhatsAppStatus();
-  document.getElementById('activeWhatsAppService').value = currentWhatsAppService;
-  updateActiveConnectionStatus();
-}
-
-async function refreshWhatsAppStatus() {
-  try {
-    // Check WhatsApp Web.js status
-    let waWebJs = { ok: false, detail: 'Checking...' };
-    try {
-      const waR = await fetch('http://localhost:2786/api/status');
-      const waD = await waR.json();
-      waWebJs = {
-        ok: waD.authenticated || false,
-        detail: waD.authenticated ? 'Connected and authenticated' : `Status: ${waD.status}`,
-        status: waD.status
-      };
-    } catch(e) {
-      waWebJs = { ok: false, detail: 'Server not responding' };
-    }
-    
-    // Check OpenWA status
-    let openWa = { ok: false, detail: 'Checking...' };
-    try {
-      const owaR = await fetch('http://localhost:2787/api/status');
-      const owaD = await owaR.json();
-      openWa = {
-        ok: owaD.authenticated || false,
-        detail: owaD.authenticated ? 'Connected and authenticated' : `Status: ${owaD.clientStatus || owaD.status}`,
-        status: owaD.clientStatus || owaD.status
-      };
-    } catch(e) {
-      openWa = { ok: false, detail: 'Server not responding' };
-    }
-    
-    // Update badges and status
-    document.getElementById('waWebJsBadge').className = 'bd ' + (waWebJs.ok ? 'on' : 'off');
-    document.getElementById('waWebJsStatus').textContent = waWebJs.ok ? 'Connected' : 'Not connected';
-    document.getElementById('waWebJsDetails').textContent = waWebJs.detail;
-    
-    document.getElementById('openWaBadge').className = 'bd ' + (openWa.ok ? 'on' : 'off');
-    document.getElementById('openWaStatus').textContent = openWa.ok ? 'Connected' : 'Not connected';
-    document.getElementById('openWaDetails').textContent = openWa.detail;
-    
-    // Update sidebar badge
-    const waBadge = document.getElementById('waBadge');
-    if (waWebJs.ok || openWa.ok) {
-      waBadge.className = 'badge';
-      waBadge.style.background = 'var(--green)';
-      waBadge.textContent = '●';
-    } else {
-      waBadge.className = 'badge';
-      waBadge.style.background = 'var(--red)';
-      waBadge.textContent = '●';
-    }
-    
-    updateActiveConnectionStatus();
-    addWhatsAppLog(`Status updated - WebJS: ${waWebJs.ok ? 'Connected' : 'Disconnected'}, OpenWA: ${openWa.ok ? 'Connected' : 'Disconnected'}`);
-    
-  } catch (error) {
-    addWhatsAppLog(`Error refreshing status: ${error.message}`);
-  }
-}
-
-function setActiveWhatsAppService() {
-  currentWhatsAppService = document.getElementById('activeWhatsAppService').value;
-  localStorage.setItem('whatsapp_service', currentWhatsAppService);
-  updateActiveConnectionStatus();
-  addWhatsAppLog(`Switched active service to: ${currentWhatsAppService === 'webjs' ? 'WhatsApp Web.js' : 'OpenWA Server'}`);
-}
-
-function updateActiveConnectionStatus() {
-  const statusDiv = document.getElementById('activeConnectionStatus');
-  const serviceName = currentWhatsAppService === 'webjs' ? 'WhatsApp Web.js' : 'OpenWA Server';
-  const port = currentWhatsAppService === 'webjs' ? '2786' : '2787';
-  
-  statusDiv.innerHTML = `<strong>Active Service:</strong> ${serviceName} (Port ${port})<br>
-                        <small>All report sending will use this connection</small>`;
-}
-
-async function linkWhatsAppWebJs() {
-  addWhatsAppLog('Initiating WhatsApp Web.js QR link...');
-  try {
-    const response = await fetch('http://localhost:2786/api/qr');
-    const data = await response.json();
-    
-    if (data.success && data.qr) {
-      document.getElementById('waQrImg').src = data.qr;
-      document.getElementById('waQrBox').style.display = 'block';
-      addWhatsAppLog('QR code displayed for WhatsApp Web.js');
-      
-      // Poll for authentication
-      const pollInterval = setInterval(async () => {
-        try {
-          const statusR = await fetch('http://localhost:2786/api/status');
-          const statusD = await statusR.json();
-          if (statusD.authenticated) {
-            clearInterval(pollInterval);
-            document.getElementById('waQrBox').style.display = 'none';
-            addWhatsAppLog('WhatsApp Web.js successfully authenticated!');
-            refreshWhatsAppStatus();
-            toast('WhatsApp Web.js connected successfully!', 'success');
-          }
-        } catch (e) {
-          // Ignore polling errors
-        }
-      }, 3000);
-      
-      // Stop polling after 3 minutes
-      setTimeout(() => clearInterval(pollInterval), 180000);
-      
-    } else if (data.authenticated) {
-      addWhatsAppLog('WhatsApp Web.js already authenticated');
-      toast('WhatsApp Web.js already connected', 'info');
-    } else {
-      addWhatsAppLog('Failed to get QR code: ' + data.message);
-      toast('Failed to get QR code: ' + data.message, 'error');
-    }
-  } catch (error) {
-    addWhatsAppLog('Error linking WhatsApp Web.js: ' + error.message);
-    toast('Error connecting to WhatsApp Web.js server', 'error');
-  }
-}
-
-async function relinkWhatsAppWebJs() {
-  addWhatsAppLog('Relinking WhatsApp Web.js...');
-  try {
-    const response = await fetch('http://localhost:2786/api/relink', { method: 'POST' });
-    const data = await response.json();
-    
-    if (response.ok) {
-      addWhatsAppLog('WhatsApp Web.js relink initiated');
-      toast('WhatsApp Web.js relink started', 'info');
-      setTimeout(() => refreshWhatsAppStatus(), 2000);
-    } else {
-      throw new Error(data.message);
-    }
-  } catch (error) {
-    addWhatsAppLog('Error relinking WhatsApp Web.js: ' + error.message);
-    toast('Error relinking WhatsApp Web.js', 'error');
-  }
-}
-
-async function linkOpenWA() {
-  addWhatsAppLog('Initiating OpenWA QR link...');
-  try {
-    const response = await fetch('http://localhost:2787/api/qr');
-    const data = await response.json();
-    
-    if (data.success && data.qr) {
-      document.getElementById('waQrImg').src = data.qr;
-      document.getElementById('waQrBox').style.display = 'block';
-      addWhatsAppLog('QR code displayed for OpenWA');
-      
-      // Poll for authentication
-      const pollInterval = setInterval(async () => {
-        try {
-          const statusR = await fetch('http://localhost:2787/api/status');
-          const statusD = await statusR.json();
-          if (statusD.authenticated) {
-            clearInterval(pollInterval);
-            document.getElementById('waQrBox').style.display = 'none';
-            addWhatsAppLog('OpenWA successfully authenticated!');
-            refreshWhatsAppStatus();
-            toast('OpenWA connected successfully!', 'success');
-          }
-        } catch (e) {
-          // Ignore polling errors
-        }
-      }, 3000);
-      
-      // Stop polling after 3 minutes
-      setTimeout(() => clearInterval(pollInterval), 180000);
-      
-    } else if (data.authenticated) {
-      addWhatsAppLog('OpenWA already authenticated');
-      toast('OpenWA already connected', 'info');
-    } else {
-      addWhatsAppLog('Failed to get QR code: ' + data.message);
-      toast('Failed to get QR code: ' + data.message, 'error');
-    }
-  } catch (error) {
-    addWhatsAppLog('Error linking OpenWA: ' + error.message);
-    toast('Error connecting to OpenWA server', 'error');
-  }
-}
-
-async function relinkOpenWA() {
-  addWhatsAppLog('Relinking OpenWA...');
-  try {
-    const response = await fetch('http://localhost:2787/api/relink', { method: 'POST' });
-    const data = await response.json();
-    
-    if (response.ok) {
-      addWhatsAppLog('OpenWA relink initiated');
-      toast('OpenWA relink started', 'info');
-      setTimeout(() => refreshWhatsAppStatus(), 2000);
-    } else {
-      throw new Error(data.message);
-    }
-  } catch (error) {
-    addWhatsAppLog('Error relinking OpenWA: ' + error.message);
-    toast('Error relinking OpenWA', 'error');
-  }
-}
-
-function connectNewWhatsApp() {
-  addWhatsAppLog('Opening new connection dialog...');
-  toast('Use the connection buttons above to link WhatsApp services', 'info');
-}
-
-function hideQrCode() {
-  document.getElementById('waQrBox').style.display = 'none';
-  addWhatsAppLog('QR code hidden');
-}
-
-function addWhatsAppLog(message) {
-  const timestamp = new Date().toLocaleTimeString();
-  waLogEntries.unshift(`[${timestamp}] ${message}`);
-  if (waLogEntries.length > 50) waLogEntries.pop(); // Keep only last 50 entries
-  
-  const logsDiv = document.getElementById('waConnectionLogs');
-  if (logsDiv) {
-    logsDiv.innerHTML = waLogEntries.map(entry => `<div>${entry}</div>`).join('');
-    logsDiv.scrollTop = 0;
-  }
-}
-
-function clearWhatsAppLogs() {
-  waLogEntries = [];
-  document.getElementById('waConnectionLogs').innerHTML = '<div style="color: var(--muted);">Connection logs will appear here...</div>';
-  addWhatsAppLog('Logs cleared');
-}
 
 // ---- Reports ----
 async function renderReports(){
@@ -1001,7 +519,7 @@ async function renderReports(){
     const filters=(page.filters||[]).map(f=>typeof f==='string'?f:(f.label+'='+f.value));
     const card=document.createElement('div'); card.className='rcard '+(page.enabled?'on':'');
     card.innerHTML=`
-      <div class="thumb" onclick="preview('${name}')">${t?`<img src="${apiUrl('/thumbnail/'+name)}?t=${Date.now()}">`:\"<div class='ph'>No preview yet<br>↻ Refresh to capture</div>\"}</div>
+      <div class="thumb" onclick="preview('${name}')">${t?`<img src="${apiUrl('/thumbnail/'+name)}?t=${Date.now()}">`:`<div class='ph'>No preview yet<br>↻ Refresh to capture</div>`}</div>
       <div class="body">
         <div class="title">${name.replace(/_/g,' ')}</div>
         <div class="meta"><span class="tag ${co}">${page.company||'GENERAL'}</span>${filters.map(f=>`<span class="ftag">${f}</span>`).join('')}</div>
@@ -1200,103 +718,8 @@ async function pollSend(){
 async function cancelSend(){ await fetch(apiUrl('/api/send-cancel'),{method:'POST'}); document.getElementById('ovText').textContent='Cancelling…'; }
 function showOvCancel(t){ document.getElementById('ovText').textContent=t; document.getElementById('ovCancel').style.display='inline-flex'; document.getElementById('overlay').classList.add('on'); }
 
-// ---- Flow Dashboard ----
-async function loadFlowDashboard() {
-  try {
-    // Load reports count
-    const enabledReports = Object.values(config.report_pages || {}).filter(p => p.enabled).length;
-    document.getElementById('flowReportsCount').textContent = enabledReports;
-    
-    // Load managers count
-    const activeManagers = (config.recipients || []).filter(r => r.enabled !== false).length;
-    document.getElementById('flowManagersCount').textContent = activeManagers;
-    
-    // Load recent logs for success rate and last run
-    try {
-      const logsRes = await fetch(apiUrl('/api/logs'));
-      const logs = await logsRes.json();
-      
-      if (logs.length > 0) {
-        const lastLog = logs[0];
-        document.getElementById('flowLastRunTime').textContent = lastLog.time;
-        
-        // Calculate success rate from recent logs
-        const recentLogs = logs.slice(0, 10); // Last 10 runs
-        const successful = recentLogs.filter(l => l.status === 'SUCCESS').length;
-        const successRate = recentLogs.length > 0 ? Math.round((successful / recentLogs.length) * 100) : 0;
-        document.getElementById('flowSuccessRate').textContent = successRate + '%';
-      }
-    } catch (e) {
-      console.log('Could not load logs for flow dashboard');
-    }
-    
-    // Check Power BI status
-    try {
-      const reportsCount = Object.keys(config.report_pages || {}).length;
-      document.getElementById('pbiStatusBadge').className = 'bd ' + (reportsCount > 0 ? 'on' : 'off');
-      document.getElementById('pbiStatusText').textContent = reportsCount > 0 ? 'Connected' : 'No reports';
-      document.getElementById('pbiStatusDetails').textContent = `${reportsCount} reports configured`;
-    } catch (e) {
-      document.getElementById('pbiStatusBadge').className = 'bd off';
-      document.getElementById('pbiStatusText').textContent = 'Error';
-    }
-    
-    // Check WhatsApp status
-    try {
-      const waRes = await fetch('http://localhost:2786/api/status');
-      const waData = await waRes.json();
-      document.getElementById('waStatusBadge').className = 'bd ' + (waData.authenticated ? 'on' : 'off');
-      document.getElementById('waStatusText').textContent = waData.authenticated ? 'Connected' : 'Not connected';
-      document.getElementById('waStatusDetails').textContent = waData.authenticated ? 'WhatsApp Web.js active' : `Status: ${waData.status}`;
-    } catch (e) {
-      document.getElementById('waStatusBadge').className = 'bd off';
-      document.getElementById('waStatusText').textContent = 'Offline';
-      document.getElementById('waStatusDetails').textContent = 'WhatsApp service not responding';
-    }
-    
-    // Load recent activity
-    loadFlowActivity();
-    
-  } catch (error) {
-    console.error('Error loading flow dashboard:', error);
-  }
-}
 
-async function loadFlowActivity() {
-  try {
-    const logsRes = await fetch(apiUrl('/api/logs'));
-    const logs = await logsRes.json();
-    
-    const activityFeed = document.getElementById('flowActivityFeed');
-    if (logs.length === 0) {
-      activityFeed.innerHTML = '<div class="empty" style="padding: 20px;">No recent activity</div>';
-      return;
-    }
-    
-    const recentLogs = logs.slice(0, 5); // Show last 5 activities
-    const activityHtml = recentLogs.map(log => `
-      <div style="padding: 12px 16px; border-bottom: 1px solid var(--line2); display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <div style="font-size: 13px; font-weight: 600;">
-            ${log.status === 'SUCCESS' ? '✅' : log.status === 'PARTIAL' ? '⚠️' : '❌'} 
-            ${log.recipients} managers • ${log.sent} sent ${log.failed ? '• ' + log.failed + ' failed' : ''}
-          </div>
-          <div style="font-size: 11px; color: var(--muted); margin-top: 2px;">${log.time}</div>
-        </div>
-        <span class="pill ${log.status === 'SUCCESS' ? 'green' : log.status === 'PARTIAL' ? 'amber' : 'red'}">${log.status}</span>
-      </div>
-    `).join('');
-    
-    activityFeed.innerHTML = activityHtml;
-  } catch (e) {
-    document.getElementById('flowActivityFeed').innerHTML = '<div class="empty" style="padding: 20px;">Could not load activity</div>';
-  }
-}
 
-async function refreshFlowData() {
-  await loadFlowDashboard();
-  toast('Flow dashboard refreshed', 'success');
-}
 
 // ---- helpers ----
 async function saveConfig(){ config.schedule=getSched(); await fetch(apiUrl('/api/config'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(config)}); }
@@ -1304,11 +727,8 @@ function showOv(t){ document.getElementById('ovText').textContent=t; document.ge
 function hideOv(){ document.getElementById('overlay').classList.remove('on'); document.getElementById('ovCancel').style.display='none'; if(pollTimer)clearTimeout(pollTimer); }
 function toast(m,t='info'){ const e=document.createElement('div'); e.className='toast '+t; e.textContent=m; document.body.appendChild(e); setTimeout(()=>e.remove(),4000); }
 
-// Initialize API URL and app
-document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('apiUrl').value = API_BASE_URL;
-  init();
-});
+// Initialize app
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
